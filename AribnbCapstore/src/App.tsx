@@ -1,9 +1,15 @@
-import HomePage from "./_HomeTemplete";
+import './App.css'
+import { useRoutes } from 'react-router-dom'
+import { router } from './router';
 
-export default function App() {
+function App() {
+  const routerElement = useRoutes(router);
+
   return (
     <div>
-      <HomePage/>
+      {routerElement}
     </div>
   )
 }
+
+export default App
