@@ -1,4 +1,3 @@
-// src/service/locationAPI.ts
 import type { Location, PaginatedLocation } from "../interfaces/location.interface";
 import api from "./api";
 

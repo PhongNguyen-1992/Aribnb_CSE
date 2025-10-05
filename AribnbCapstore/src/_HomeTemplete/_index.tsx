@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Spin, Flex } from "antd";
 import Footer from "../Component/footer";
-import { Outlet } from "react-router-dom";
 import AppHeader from "../Component/hearder";
+import ListVisit from "./noiLuuTru/listVist";
+
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
@@ -26,8 +27,9 @@ export default function HomePage() {
 
   return (
     <div>
-      <AppHeader />
-      <Outlet />
+      <AppHeader />     
+      <ListVisit/>
+      
       <Footer />
     </div>
   );

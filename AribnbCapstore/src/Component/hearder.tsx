@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { userAuthStore } from "../store";
 import type { LoginApiResponse } from "../interfaces/auth.interface";
+import Logo from "./logo";
 
 const { Header } = Layout;
 
@@ -353,7 +354,7 @@ const AppHeader: React.FC = () => {
           {!isMobile && (
             <>
               <div className="flex items-center justify-between px-8 py-6">
-                <TravelHubLogo />
+                <Logo/>
 
                 {/* Animated Navigation */}
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full p-2 border border-white/20">

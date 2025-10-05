@@ -6,11 +6,13 @@ import { type RouteObject, Navigate } from "react-router-dom";
 const HomePage = lazy(() => import("../_HomeTemplete/_index"));
 const DichVu = lazy(() => import("../_HomeTemplete/dichVu"));
 const TraiNghiem = lazy(() => import("../_HomeTemplete/traiNghiem"));
-const NoiLuuTru = lazy(() => import("../_HomeTemplete/noiLuuTru"));
+const NoiLuuTru = lazy(() => import("../_HomeTemplete/_index"));
 const AdminPage = lazy(() => import("../_AdminTemplete"));
 const AuthLayout = lazy(() => import("../_AuthenTemplete"));
 const Login = lazy(() => import("../_AuthenTemplete/Login/index"));
 const Register = lazy(() => import("../_AuthenTemplete/Register/index"));
+const RoomDetail = lazy(() => import("../_HomeTemplete/noiLuuTru/detailRoom"));
+
 
 const withSuspense = (Component: LazyExoticComponent<FC>) => (
   <Suspense
@@ -29,8 +31,8 @@ const withSuspense = (Component: LazyExoticComponent<FC>) => (
         <Flex vertical align="center" justify="center" gap="large">
           <Spin tip="Loading..." size="large" />
           <Alert
-            message="Chào Mừng Bạn Đến Với Aribnb"
-            description="Chúng tôi đang tải dữ liệu, vui lòng chờ một chút"
+            message="Chào mừng bạn đến với Airbnb"
+            description="Chúng tôi đang tải dữ liệu, vui lòng chờ một chút..."
             type="info"
             showIcon
           />
@@ -47,11 +49,15 @@ export const router: RouteObject[] = [
     path: "/",
     element: withSuspense(HomePage),
     children: [
-      { index: true, element: <Navigate to="/NoiLuuTru" replace /> }, // mặc định vào NoiLuuTru
+      { index: true, element: <Navigate to="/NoiLuuTru" replace /> },
       { path: "NoiLuuTru", element: withSuspense(NoiLuuTru) },
       { path: "TraiNghiem", element: withSuspense(TraiNghiem) },
       { path: "DichVu", element: withSuspense(DichVu) },
     ],
+  },
+  {
+    path: "/room-detail/:id/:tenViTri", 
+    element: withSuspense(RoomDetail),
   },
   {
     path: "/auth",

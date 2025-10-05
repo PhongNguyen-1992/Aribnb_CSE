@@ -1,13 +1,14 @@
 export interface Location {
-    id:        number;
-    tenViTri:  string;
-    tinhThanh: string;
-    quocGia:   string;
-    hinhAnh:   string;
+  id: number;
+  tenViTri: string;
+  tinhThanh: string;
+  quocGia: string;
+  hinhAnh: string;
 }
-export interface PaginatedLocation<T> {
+
+export interface PaginatedLocationResponse {
   pageIndex: number;
   pageSize: number;
   totalRow: number;
-  data: T[];
+  data: Location[];
 }
