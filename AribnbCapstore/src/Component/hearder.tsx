@@ -353,7 +353,7 @@ const AppHeader: React.FC = () => {
           {/* Desktop Header */}
           {!isMobile && (
             <>
-              <div className="flex items-center justify-between px-8 py-6">
+              <div className="flex items-center justify-between px-4 py-3 container mx-auto">
                 <Logo/>
 
                 {/* Animated Navigation */}
@@ -426,7 +426,7 @@ const AppHeader: React.FC = () => {
           {isMobile && (
             <>
               <div className="flex items-center justify-between px-6 py-5">
-                <TravelHubLogo />
+                <Logo />
                 <Button
                   type="text"
                   icon={<AlignJustify className="w-7 h-7 text-white" />}

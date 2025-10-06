@@ -4,14 +4,14 @@ import { type RouteObject, Navigate } from "react-router-dom";
 
 // Lazy load pages
 const HomePage = lazy(() => import("../_HomeTemplete/_index"));
-const DichVu = lazy(() => import("../_HomeTemplete/dichVu"));
-const TraiNghiem = lazy(() => import("../_HomeTemplete/traiNghiem"));
+const DichVu = lazy(() => import("../_HomeTemplete/ServicePage"));
+const TraiNghiem = lazy(() => import("../_HomeTemplete/ExperiencesPage"));
 const NoiLuuTru = lazy(() => import("../_HomeTemplete/_index"));
 const AdminPage = lazy(() => import("../_AdminTemplete"));
 const AuthLayout = lazy(() => import("../_AuthenTemplete"));
 const Login = lazy(() => import("../_AuthenTemplete/Login/index"));
 const Register = lazy(() => import("../_AuthenTemplete/Register/index"));
-const RoomDetail = lazy(() => import("../_HomeTemplete/noiLuuTru/detailRoom"));
+const RoomDetail = lazy(() => import("../_HomeTemplete/StayInfoPage/detailRoom"));
 
 
 const withSuspense = (Component: LazyExoticComponent<FC>) => (

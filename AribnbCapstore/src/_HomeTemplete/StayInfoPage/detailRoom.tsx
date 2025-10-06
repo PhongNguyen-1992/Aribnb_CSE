@@ -18,6 +18,7 @@ import { roomApi } from '../../service/detail.api';
 import type { Room } from '../../interfaces/detail.interface';
 import AppHeader from '../../Component/hearder';
 import AppHeaderInto from '../../Component/hearderinto';
+import Footer from '../../Component/footer';
 
 
 const RoomDetail = () => {
@@ -162,29 +163,30 @@ const RoomDetail = () => {
               Đặt phòng
             </button>
 
-            <div className="mt-4 text-center text-sm text-gray-600">
-              Bạn vẫn chưa bị trừ tiền
-            </div>
+            <div className="mt-6 text-center text-sm text-gray-500 italic tracking-wide">
+  Giá dự tính <span className="font-medium text-gray-700">5 đêm</span> tại đây 
+  <br className="hidden sm:block" />
+  <span className="text-gray-400">(Chưa gồm phí phát sinh & thuế)</span>
+</div>
+
 
             <div className="mt-6 pt-6 border-t">
               <div className="flex justify-between mb-2">
                 <span className="text-gray-700">${room.giaTien} x 5 đêm</span>
                 <span className="text-gray-700">${(room.giaTien * 5).toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-700">Phí dịch vụ</span>
-                <span className="text-gray-700">$50</span>
-              </div>
+              </div>              
               <div className="flex justify-between font-semibold text-lg pt-4 border-t">
                 <span>Tổng</span>
-                <span>${(room.giaTien * 5 + 50).toLocaleString()}</span>
+                <span>${(room.giaTien * 5).toLocaleString()}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <Footer/>
     </div>
+    
   );
 };
 

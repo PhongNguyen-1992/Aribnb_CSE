@@ -16,14 +16,13 @@ import Visit from "./Visit";
 import type { PaginatedLocationResponse } from "../../interfaces/location.interface";
 import { getLocationsPagingAPI } from "../../service/location.api";
 
-const { Text, Title } = Typography;
+
 const { useToken } = theme;
 
 const PAGE_SIZE_OPTIONS = [4, 8, 12, 16, 20, 24];
 
 const ListVisit: React.FC = () => {
-  const navigate = useNavigate();
-  const { token } = useToken();
+    const { token } = useToken();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(4);
 
@@ -44,12 +43,12 @@ const ListVisit: React.FC = () => {
     placeholderData: (previousData) => previousData,
   });
 
-  const handleViewRooms = useCallback(
-    (locationId: number, locationName: string) => {
-      navigate(`/rooms?locationId=${locationId}&locationName=${encodeURIComponent(locationName)}`);
-    },
-    [navigate]
-  );
+  // const handleViewRooms = useCallback(
+  //   (locationId: number, locationName: string) => {
+  //     navigate(`/rooms?locationId=${locationId}&locationName=${encodeURIComponent(locationName)}`);
+  //   },
+  //   [navigate]
+  // );
 
   const handlePageChange = useCallback(
     (page: number, size?: number) => {
@@ -120,7 +119,7 @@ const ListVisit: React.FC = () => {
     <div style={containerStyle}>
       <div style={{ padding: `${token.paddingXL}px 0` }}>
         {/* Header */}
-        <div style={{ marginBottom: token.marginXL, textAlign: "center" }}>
+        {/* <div style={{ marginBottom: token.marginXL, textAlign: "center" }}>
           <Title level={2} style={{ marginBottom: token.marginXS, color: token.colorText }}>
             Khám Phá Các Điểm Đến
           </Title>
@@ -135,7 +134,7 @@ const ListVisit: React.FC = () => {
               </Text>
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Location Cards */}
         <div style={{ position: "relative", minHeight: isEmpty ? 200 : "auto" }}>
