@@ -5,44 +5,76 @@ import {
   Camera,
   Save,
   X,
-  User,
   Mail,
   Phone,
   Lock,
   Eye,
   EyeOff,
+  User,
 } from "lucide-react";
-import { userAuthStore } from "../../store";
-import { updateUserAPI, uploadAvatarAPI } from "../../service/admin.api";
+
+import {
+  updateUserAPI,
+  uploadAvatarAPI,
+} from "../../service/AdminPageAPI/user.api";
 import AppHeaderInto from "../../Component/hearderinto";
 import Footer from "../../Component/footer";
+import type { Users } from "../../interfaces/auth.interface";
+import { create } from "zustand";
 
+// ===== STORE =====
+const getUserFromStorage = (): Users | null => {
+  try {
+    const userLocal = localStorage.getItem("user");
+    if (!userLocal) return null;
+    return JSON.parse(userLocal);
+  } catch {
+    localStorage.removeItem("user");
+    return null;
+  }
+};
+
+type AuthStore = {
+  user: Users | null;
+  isAuthenticated: boolean;
+  setUser: (user: Users) => void;
+  clearUser: () => void;
+};
+
+export const userAuthStore = create<AuthStore>((set) => ({
+  user: getUserFromStorage(),
+  isAuthenticated: !!getUserFromStorage(),
+  setUser: (user: Users) => {
+    set({ user, isAuthenticated: true });
+    localStorage.setItem("user", JSON.stringify(user));
+  },
+  clearUser: () => {
+    set({ user: null, isAuthenticated: false });
+    localStorage.removeItem("user");
+  },
+}));
+
+// ===== MAIN COMPONENT =====
 const UserProfile: React.FC = () => {
   const { user, setUser } = userAuthStore();
   const [form] = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [pendingAvatar, setPendingAvatar] = useState<File | null>(null);
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ✅ Đồng bộ user giữa Zustand và localStorage
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user") || "null");
-    if (storedUser && (!user || storedUser.id !== user.id)) {
+    const storedUser = getUserFromStorage();
+    if (storedUser) {
       setUser(storedUser);
       form.setFieldsValue(storedUser);
-    } else if (user) {
-      form.setFieldsValue(user);
     }
-  }, [user, form, setUser]);
+  }, [form, setUser]);
 
-  // 📸 Click chọn file ảnh
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
+  const handleAvatarClick = () => fileInputRef.current?.click();
 
-  // 🖼️ Khi chọn ảnh mới
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -52,47 +84,42 @@ const UserProfile: React.FC = () => {
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      message.error("Kích thước ảnh không vượt quá 5MB!");
+      message.error("Ảnh không được vượt quá 5MB!");
       return;
     }
 
-    const previewUrl = URL.createObjectURL(file);
-    setPreviewAvatar(previewUrl);
+    setPendingAvatar(file);
 
     Modal.confirm({
       title: "Xác nhận thay đổi ảnh đại diện",
       content: "Bạn có chắc chắn muốn cập nhật ảnh đại diện mới này không?",
       okText: "Đồng ý",
       cancelText: "Hủy",
-      onOk: async () => {
-        await handleUploadAvatar(file);
-      },
+      onOk: () => setPreviewAvatar(URL.createObjectURL(file)),
       onCancel: () => {
-        setPreviewAvatar(null);
+        setPendingAvatar(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
       },
     });
   };
 
-  // ☁️ Upload avatar bằng API riêng
-  const handleUploadAvatar = async (file: File) => {
-    if (!user) return;
+  // ✅ Upload avatar
+  const handleSaveAvatar = async () => {
+    if (!pendingAvatar || !user) {
+      message.warning("Vui lòng chọn ảnh trước!");
+      return;
+    }
+
     setIsUploading(true);
     try {
-      const tokenData = JSON.parse(localStorage.getItem("user") || "{}");
-      const token = tokenData?.accessToken;
-      if (!token) {
-        message.error("Bạn cần đăng nhập để cập nhật ảnh đại diện!");
-        return;
-      }
-
-      const newAvatar = await uploadAvatarAPI(file, token); // ✅ Dùng API riêng
-
+      const newAvatar = await uploadAvatarAPI(pendingAvatar);
       const updatedUser = { ...user, avatar: newAvatar };
+
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
       message.success("✅ Cập nhật ảnh đại diện thành công!");
+      setPendingAvatar(null);
       setPreviewAvatar(null);
     } catch (err: any) {
       console.error("❌ Lỗi upload avatar:", err);
@@ -102,27 +129,28 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  // ✏️ Chỉnh sửa thông tin
   const handleEdit = () => {
     setIsEditing(true);
     form.setFieldsValue(user || {});
   };
 
-  // ❌ Hủy chỉnh sửa
   const handleCancel = () => {
     setIsEditing(false);
     form.resetFields();
   };
 
-  // 💾 Lưu thông tin user
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
       if (!user) return;
-      const updated = await updateUserAPI(user.id, values);
+
+      const updatedData = { ...values, role: user.role };
+      const updated = await updateUserAPI(user.id, updatedData);
       const newUser = { ...user, ...updated };
+
       setUser(newUser);
       localStorage.setItem("user", JSON.stringify(newUser));
+
       message.success("Cập nhật thông tin thành công!");
       setIsEditing(false);
     } catch (err: any) {
@@ -132,28 +160,34 @@ const UserProfile: React.FC = () => {
   };
 
   if (!user)
-    return <div className="text-center py-10">Không có thông tin người dùng!</div>;
+    return (
+      <div className="text-center py-10">
+        Không có thông tin người dùng!
+      </div>
+    );
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        <div style={{ marginBottom: "24px" }}>
+    <div className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen pb-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-6">
           <AppHeaderInto />
         </div>
 
-        <div className="mb-6">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
             <span className="bg-indigo-100 text-indigo-600 p-3 rounded-xl">
               <User size={28} />
             </span>
             Hồ sơ cá nhân
           </h1>
-          <p className="text-gray-500 mt-2">Quản lý thông tin tài khoản của bạn</p>
+          <p className="text-gray-500 mt-2">
+            Quản lý thông tin tài khoản của bạn
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Avatar */}
-          <Card className="shadow-lg border-0 flex flex-col items-center">
+          {/* Avatar Section */}
+          <Card className="shadow-lg border-0 flex flex-col items-center p-6">
             <div className="relative group">
               <img
                 src={previewAvatar || user.avatar || "/default-avatar.png"}
@@ -168,7 +202,7 @@ const UserProfile: React.FC = () => {
               <button
                 onClick={handleAvatarClick}
                 disabled={isUploading}
-                className="absolute bottom-2 right-2 bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all"
+                className="absolute bottom-2 right-2 bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg"
               >
                 <Camera size={20} />
               </button>
@@ -181,8 +215,13 @@ const UserProfile: React.FC = () => {
               />
             </div>
 
-            <h2 className="text-xl font-bold mt-4">{user.name}</h2>
-            <p className="text-gray-500 text-sm">{user.email}</p>
+            <h2 className="text-xl font-bold mt-4">Xin chào, {user.name}</h2>
+            {/* 🆔 Thêm mã người dùng */}
+            <p className="text-gray-500 text-sm">
+              Mã người dùng: <span className="font-medium">#{user.id}</span>
+            </p>
+            <p className="text-gray-500 text-sm">Mail: {user.email}</p>
+
             <div className="mt-3">
               <span
                 className={`px-4 py-2 rounded-lg text-sm font-semibold ${
@@ -191,12 +230,39 @@ const UserProfile: React.FC = () => {
                     : "bg-green-100 text-green-700"
                 }`}
               >
-                {user.role === "ADMIN" ? "👑 Quản trị viên" : "👤 Người dùng"}
+                {user.role === "ADMIN"
+                  ? "👑 Quản trị viên"
+                  : "👤 Người dùng"}
               </span>
             </div>
+
+            {pendingAvatar && (
+              <div className="mt-4 flex gap-2 w-full">
+                <Button
+                  type="primary"
+                  icon={<Save size={16} />}
+                  onClick={handleSaveAvatar}
+                  loading={isUploading}
+                  className="bg-green-600 flex-1"
+                >
+                  Lưu ảnh đại diện
+                </Button>
+                <Button
+                  icon={<X size={16} />}
+                  onClick={() => {
+                    setPendingAvatar(null);
+                    setPreviewAvatar(null);
+                    if (fileInputRef.current)
+                      fileInputRef.current.value = "";
+                  }}
+                >
+                  Hủy
+                </Button>
+              </div>
+            )}
           </Card>
 
-          {/* Thông tin chi tiết */}
+          {/* Info Section */}
           <Card
             className="lg:col-span-2 shadow-lg border-0"
             title={
@@ -233,6 +299,11 @@ const UserProfile: React.FC = () => {
           >
             <Form form={form} layout="vertical" disabled={!isEditing}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 🆔 Mã người dùng */}
+                <Form.Item label="Mã người dùng">
+                  <Input value={user.id} disabled />
+                </Form.Item>
+
                 <Form.Item
                   name="name"
                   label="Họ và tên"
@@ -240,12 +311,15 @@ const UserProfile: React.FC = () => {
                 >
                   <Input prefix={<User size={16} />} />
                 </Form.Item>
+
                 <Form.Item name="email" label="Email">
                   <Input prefix={<Mail size={16} />} disabled />
                 </Form.Item>
+
                 <Form.Item name="phone" label="Số điện thoại">
                   <Input prefix={<Phone size={16} />} />
                 </Form.Item>
+
                 <Form.Item name="gender" label="Giới tính">
                   <Select>
                     <Select.Option value={true}>Nam</Select.Option>
@@ -261,7 +335,13 @@ const UserProfile: React.FC = () => {
                   suffix={
                     <Button
                       type="text"
-                      icon={showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      icon={
+                        showPassword ? (
+                          <EyeOff size={16} />
+                        ) : (
+                          <Eye size={16} />
+                        )
+                      }
                       onClick={() => setShowPassword(!showPassword)}
                     />
                   }
@@ -272,7 +352,7 @@ const UserProfile: React.FC = () => {
           </Card>
         </div>
 
-        <div style={{ marginTop: "24px" }}>
+        <div className="mt-8">
           <Footer />
         </div>
       </div>

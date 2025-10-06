@@ -2,11 +2,11 @@
 import React, { useState } from "react";
 import { Modal, Avatar, Descriptions, Tag, Button } from "antd";
 import { UserCircle } from "lucide-react";
-import type { User } from "../interfaces/auth.interface";
+import type { Users } from "../interfaces/auth.interface";
 
 
 
-const ProfileModal: React.FC<{ user: User }> = ({ user }) => {
+const ProfileModal: React.FC<{ user: Users }> = ({ user }) => {
   const [open, setOpen] = useState(false);
 
   return (

@@ -1,12 +1,12 @@
 // src/service/auth.api.ts
 import type { BaseAPIResponse } from "../interfaces/base.interface";
-import type { LoginApiResponse, Register, User } from "../interfaces/auth.interface";
+import type { LoginApiResponse, Register, Users } from "../interfaces/auth.interface";
 import api from "./api";
 
 
 
 // Transform function để convert API response thành User interface
-const transformUserData = (apiResponse: LoginApiResponse): User => {
+const transformUserData = (apiResponse: LoginApiResponse): Users => {
   return {
     id: apiResponse.id || 0,
     name: apiResponse.name || apiResponse.hoTen || "Unknown User",
@@ -28,7 +28,7 @@ const transformUserData = (apiResponse: LoginApiResponse): User => {
 export const loginAPI = async (credentials: {
   email: string;
   password: string;
-}): Promise<User & { accessToken?: string }> => {
+}): Promise<Users & { accessToken?: string }> => {
   try {
     console.log("🚀 Logging in with:", credentials);
 
@@ -104,7 +104,7 @@ export const registerAPI = async (registerData: {
 /**
  * API thêm người dùng mới (Admin function)
  */
-export const addUserAPI = async (data: User): Promise<Register> => {
+export const addUserAPI = async (data: Users): Promise<Register> => {
   try { 
     const userStr = localStorage.getItem("user");
     if (!userStr) {
@@ -170,7 +170,7 @@ export const isLoggedIn = (): boolean => {
 /**
  * Utility function: lấy thông tin user hiện tại
  */
-export const getCurrentUser = (): (User & { accessToken?: string }) | null => {
+export const getCurrentUser = (): (Users & { accessToken?: string }) | null => {
   try {
     const userStr = localStorage.getItem("user");
     if (!userStr) return null;
@@ -186,7 +186,7 @@ export const getCurrentUser = (): (User & { accessToken?: string }) | null => {
 /**
  * Utility function: refresh user data
  */
-export const refreshUserData = async (): Promise<User | null> => {
+export const refreshUserData = async (): Promise<Users | null> => {
   try {
     const currentUser = getCurrentUser();
     if (!currentUser) return null;

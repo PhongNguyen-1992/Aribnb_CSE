@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Layout, Button, Dropdown, Avatar, message } from "antd";
-import { NavLink} from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import {
   Search,
   User,
@@ -9,6 +9,7 @@ import {
   Globe,
   UserCircle,
   Shield,
+  House,
 } from "lucide-react";
 import { userAuthStore } from "../store";
 import type { LoginApiResponse } from "../interfaces/auth.interface";
@@ -16,7 +17,7 @@ import Logo from "./logo";
 
 const { Header } = Layout;
 
-const AppHeaderInto: React.FC = () => {  
+const AppHeaderInto: React.FC = () => {
   const { clearUser } = userAuthStore((state: any) => state);
   const [user, setUser] = useState<LoginApiResponse | null>(null);
 
@@ -42,8 +43,13 @@ const AppHeaderInto: React.FC = () => {
   const avatarMenu = {
     items: [
       {
+        key: "home",
+        label: <NavLink to="/">Trang chủ</NavLink>,
+        icon: <House className="h-4 w-4" />,
+      },
+      {
         key: "profile",
-        label: <NavLink to="/profile">Thông tin cá nhân</NavLink>,
+        label: <NavLink to="/UserProfile">Thông tin cá nhân</NavLink>,
         icon: <UserCircle className="h-4 w-4" />,
       },
       ...(user?.role === "ADMIN"
@@ -85,13 +91,19 @@ const AppHeaderInto: React.FC = () => {
         {/* Search Bar - White Background */}
         <div className="hidden md:flex items-center bg-white rounded-full shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-gray-200">
           <div className="px-6 py-3 border-r border-gray-200 hover:bg-gray-50 rounded-l-full transition-colors cursor-pointer group">
-            <div className="text-sm font-medium text-gray-800 group-hover:text-gray-900">Địa điểm</div>
+            <div className="text-sm font-medium text-gray-800 group-hover:text-gray-900">
+              Địa điểm
+            </div>
           </div>
           <div className="px-6 py-3 border-r border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer group">
-            <div className="text-sm font-medium text-gray-800 group-hover:text-gray-900">Nhận phòng</div>
+            <div className="text-sm font-medium text-gray-800 group-hover:text-gray-900">
+              Nhận phòng
+            </div>
           </div>
           <div className="px-6 py-3 flex items-center gap-3 hover:bg-gray-50 rounded-r-full transition-colors cursor-pointer group">
-            <div className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Thêm khách</div>
+            <div className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+              Thêm khách
+            </div>
             <div className="bg-gradient-to-r from-[#FF385C] to-[#E31C5F] p-2.5 rounded-full hover:scale-110 hover:shadow-lg transition-all duration-300 cursor-pointer">
               <Search className="w-4 h-4 text-white" />
             </div>
@@ -112,7 +124,11 @@ const AppHeaderInto: React.FC = () => {
           </div>
 
           {user ? (
-            <Dropdown menu={avatarMenu} placement="bottomRight" trigger={["click"]}>
+            <Dropdown
+              menu={avatarMenu}
+              placement="bottomRight"
+              trigger={["click"]}
+            >
               <div className="flex items-center gap-3 bg-white rounded-full py-2 px-4 hover:shadow-2xl transition-all duration-300 cursor-pointer border border-gray-100 hover:border-gray-300 hover:scale-105">
                 <AlignJustify className="w-4 h-4 text-gray-700 hover:text-gray-900 transition-colors" />
                 <Avatar

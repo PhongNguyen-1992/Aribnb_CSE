@@ -4,12 +4,17 @@ import {
   ChevronsLeft,
   ChevronsRight, 
   Users, 
-  House,
+  House,  
+  Calendar,
+  Hotel,
 } from "lucide-react";
 import {
+  Booking,
+  Room,
   UsersManagement,
 } from "./Content/_index";
 import { useNavigate } from "react-router-dom";
+import Logo from "../Component/logo";
 
 const { Sider, Content } = Layout;
 
@@ -40,12 +45,7 @@ const App: React.FC = () => {
         collapsedWidth={120}
       >
         <div className="text-center font-bold uppercase leading-tight">
-          <div className="text-xl bg-gradient-to-r from-[#ff9a9e] via-[#fbc2eb] to-[#c2e9fb] bg-clip-text text-transparent drop-shadow-md p-4">
-            AIR{" "}
-            <span className="text-xl bg-gradient-to-r from-[#ff512f] via-[#dd2476] to-[#ff512f] bg-clip-text text-transparent drop-shadow">
-              BNB
-            </span>
-          </div>
+          <Logo/>
         </div>
 
         <Menu
@@ -56,6 +56,28 @@ const App: React.FC = () => {
           defaultSelectedKeys={["1"]}
           items={[           
             { key: "1", icon: <Users />, label: "Users Management" },
+          
+          ]}
+        />
+         <Menu
+          selectedKeys={[selectedKey]}
+          onClick={handleMenuClick}
+          theme="dark"
+          mode="inline"
+          defaultSelectedKeys={["2"]}
+          items={[           
+            { key: "2", icon: <Hotel />, label: "Room Management" },
+          
+          ]}
+        />
+          <Menu
+          selectedKeys={[selectedKey]}
+          onClick={handleMenuClick}
+          theme="dark"
+          mode="inline"
+          defaultSelectedKeys={["3"]}
+          items={[           
+            { key: "3", icon: <Calendar />, label: "Booking Management" },
           
           ]}
         />
@@ -93,19 +115,21 @@ const App: React.FC = () => {
       </Sider>
 
       <Layout>
-        <Content
-          style={{
-            margin: "24px 16px",
-            padding: 24,
-            minHeight: 280,
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
-          }}
-        >
-          {selectedKey === "1" && <UsersManagement />}
-         
-        </Content>
-      </Layout>
+  <Content
+    style={{
+      margin: "24px 16px",
+      padding: 24,
+      minHeight: 280,
+      background: colorBgContainer,
+      borderRadius: borderRadiusLG,
+    }}
+  >
+    {selectedKey === "1" && <UsersManagement />}
+    {selectedKey === "2" && <Room />}
+    {selectedKey === "3" && <Booking />}
+  </Content>
+</Layout>
+
     </Layout>
   );
 };

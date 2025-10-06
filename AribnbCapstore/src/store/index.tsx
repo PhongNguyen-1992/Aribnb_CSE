@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import type { User } from "../interfaces/auth.interface";
+import type { Users } from "../interfaces/auth.interface";
 
 // Safe localStorage parsing function
-const getUserFromStorage = (): User | null => {
+const getUserFromStorage = (): Users | null => {
   try {
     const userLocal = localStorage.getItem("user");
     if (!userLocal) return null;
@@ -19,9 +19,9 @@ const getUserFromStorage = (): User | null => {
 
 // Type cho User Store
 type AuthStore = {
-  user: User | null;
+  user: Users | null;
   isAuthenticated: boolean;
-  setUser: (user: User) => void;
+  setUser: (user: Users) => void;
   clearUser: () => void;
 };
 
@@ -29,7 +29,7 @@ export const userAuthStore = create<AuthStore>((set) => ({
   user: getUserFromStorage(),
   isAuthenticated: !!getUserFromStorage(),
 
-  setUser: (user: User) => {
+  setUser: (user: Users) => {
     console.log("✅ Setting user in store:", user);
 
     // Sync với store + localStorage

@@ -14,7 +14,7 @@ export interface Register {
   gender: boolean;
   role: string;
 }
-export interface User {
+export interface Users {
   id: number;
   name: string;
   email: string;
@@ -38,7 +38,7 @@ export interface CurrentUser {
   gender: boolean;
   role: "USER" | "ADMIN";
 }
-export interface AuthUser extends User {
+export interface AuthUser extends Users {
   token: string;
 }
 export interface LoginApiResponse {
