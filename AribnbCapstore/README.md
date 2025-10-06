@@ -1,69 +1,14 @@
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Người thực hiện Nguyễn Hồng Phong
+## ADMIN
+- Quản lý booking: tạo, chỉnh sửa, xóa đặt phòng.
+- Quản lý phòng: danh sách, chỉnh sửa/ xóa/ thêm phòng.
+- Quản lý khách hàng: thông tin cá nhân, role , xóa, sửa, thêm
+- Đánh giá & review: hiển thị nổi bật, đánh giá sao, comment, sửa, xóa
+- Responsive: giao diện thân thiện với mọi thiết bị.
+## USER
+- Kết nối Front-end với Back-end
+- Giao diện trang chủ
+- Trang Detail: Thông tin phòng, đánh giá, đặt phòng
+- Trang đặt phòng: tính đơn gián, xác nhận và thông báo đặt phòng thành công, gửi đơn hàng về Profile và dashboard
+- Profile: Thông tin khách hàng/ user đang đăng nhập, cập nhật/ sửa thông tin/ thay đổi Avatar. Mở rộng lịch sử đặt hàng. Check đơn hàng nếu thông báo đển shop hủy sau khi shop hủy/ Lịch sử xe mất (mở rộng về sau sẽ không mất thành Hủy)
+- Responsive: giao diện thân thiện với mọi thiết bị.

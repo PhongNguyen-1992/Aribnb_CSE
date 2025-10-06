@@ -1,26 +1,49 @@
 // src/service/comment.api.ts
-import axios from "axios";
 import type { BinhLuan } from "../interfaces/room.interface";
-
-
-const BASE_URL = "https://airbnbnew.cybersoft.edu.vn/api/binh-luan";
+import api from "./api"; // ✅ Dùng axios instance có interceptor
 
 export const commentApi = {
+  // 🔹 Lấy tất cả bình luận
+  async getAllComments(): Promise<BinhLuan[]> {
+    try {
+      const res = await api.get("/binh-luan");
+      return res.data.content || [];
+    } catch (error) {
+      console.error("❌ Lỗi khi lấy danh sách bình luận:", error);
+      throw error;
+    }
+  },
+
+  // 🔹 Lấy bình luận theo ID phòng (nếu cần)
   async getCommentsByRoomId(roomId: number): Promise<BinhLuan[]> {
     try {
-      const res = await axios.get(
-        `${BASE_URL}/lay-binh-luan-theo-phong/${roomId}`,
-        {
-          headers: {
-            tokenCybersoft:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5Mb3AiOiJCb290Y2FtcCA4MyIsIkhldEhhblN0cmluZyI6IjE4LzAxLzIwMjYiLCJIZXRIYW5UaW1lIjoiMTc2ODY5NDQwMDAwMCIsIm5iZiI6MTc0MTg4ODgwMCwiZXhwIjoxNzY4ODQ1NjAwfQ.rosAjjMuXSBmnsEQ7BQi1qmo6eVOf1g8zhTZZg6WSx4",
-          },
-        }
-      );
+      const res = await api.get(`/binh-luan/lay-binh-luan-theo-phong/${roomId}`);
       return res.data.content || [];
-    } catch (err) {
-      console.error("❌ Lỗi lấy bình luận:", err);
-      return [];
+    } catch (error) {
+      console.error("❌ Lỗi khi lấy bình luận theo phòng:", error);
+      throw error;
+    }
+  },
+
+  // 🔹 Cập nhật bình luận
+  async updateComment(id: number, data: Partial<BinhLuan>) {
+    try {
+      const res = await api.put(`/binh-luan/${id}`, data);
+      return res.data;
+    } catch (error) {
+      console.error("❌ Lỗi khi cập nhật bình luận:", error);
+      throw error;
+    }
+  },
+
+  // 🔹 Xóa bình luận
+  async deleteComment(id: number) {
+    try {
+      const res = await api.delete(`/binh-luan/${id}`);
+      return res.data;
+    } catch (error) {
+      console.error("❌ Lỗi khi xóa bình luận:", error);
+      throw error;
     }
   },
 };

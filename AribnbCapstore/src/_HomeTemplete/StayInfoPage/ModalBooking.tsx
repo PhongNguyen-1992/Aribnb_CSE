@@ -3,7 +3,6 @@ import { Modal, DatePicker, InputNumber, message, Spin } from "antd";
 import _, { Dayjs } from "dayjs";
 import { bookingApi } from "../../service/bookRoom.api";
 
-
 const { RangePicker } = DatePicker;
 
 interface BookingModalProps {
@@ -11,7 +10,7 @@ interface BookingModalProps {
   onClose: () => void;
   roomId: number;
   roomName: string;
-  roomPrice: number; 
+  roomPrice: number;
 }
 
 const BookingModal: React.FC<BookingModalProps> = ({
@@ -29,9 +28,9 @@ const BookingModal: React.FC<BookingModalProps> = ({
     try {
       const userLocal = localStorage.getItem("user");
       const user = userLocal ? JSON.parse(userLocal) : null;
-      const userId = user?.id || user?.user?.id; // 🔧 fix undefined id
-
-      console.log("👤 User:", user);
+      const userId = user?.id || user?.user?.id;
+      const userName = user?.name || user?.user?.name || "Khách hàng";
+      const phone = "0339990014";
 
       if (!userId) {
         message.error("Vui lòng đăng nhập trước khi đặt phòng");
@@ -49,6 +48,8 @@ const BookingModal: React.FC<BookingModalProps> = ({
         return;
       }
 
+      const totalPrice = totalDays * roomPrice;
+
       const payload = {
         maPhong: roomId,
         ngayDen: dates[0].toISOString(),
@@ -57,14 +58,29 @@ const BookingModal: React.FC<BookingModalProps> = ({
         maNguoiDung: userId,
       };
 
-      console.log("📦 Booking payload:", payload);
-
       setLoading(true);
       await bookingApi.createBooking(payload);
 
-      message.success("🎉 Đặt phòng thành công!");
+      // ✅ Đóng modal thanh toán
       onClose();
-    } catch (err: any) {
+
+      // ✅ Hiện alert cảm ơn (sau 300ms)
+      setTimeout(() => {
+        alert(
+          `🎉 Đặt phòng thành công!\n\n` +
+            `Khách hàng: ${userName}\n` +
+            `Phòng: ${roomName}\n` +
+            `Ngày đến: ${dates[0].format("DD/MM/YYYY")}\n` +
+            `Ngày đi: ${dates[1].format("DD/MM/YYYY")}\n` +
+            `Số khách: ${guestCount}\n` +
+            `Thành tiền: $${totalPrice.toLocaleString()}\n\n` +
+            `❤️ Cảm ơn anh/chị đã đặt phòng!\n` +
+            `Chúng tôi sẽ liên hệ qua số ${phone} để xác nhận.\n` +
+            `Kiểm tra thông tin đặt phòng trong phần Quản lý đặt phòng.\n`+
+            `Chúc anh/chị có một kỳ nghỉ tuyệt vời!`
+        );
+      }, 300);
+    } catch (err) {
       console.error("❌ Booking error:", err);
       message.error("Không thể đặt phòng. Vui lòng thử lại!");
     } finally {
@@ -82,6 +98,8 @@ const BookingModal: React.FC<BookingModalProps> = ({
       onCancel={onClose}
       footer={null}
       centered
+      destroyOnClose
+      maskClosable={false}
     >
       <Spin spinning={loading}>
         <div className="space-y-4">

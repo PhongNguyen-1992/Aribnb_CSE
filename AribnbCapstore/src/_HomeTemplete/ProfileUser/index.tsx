@@ -1,5 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Card, Button, Form, Input, Select, message, Modal, Spin } from "antd";
+import {
+  Card,
+  Button,
+  Form,
+  Input,
+  Select,
+  message,
+  Modal,
+  Spin,
+  Table,
+  Popconfirm,
+} from "antd";
 import {
   Edit2,
   Camera,
@@ -11,14 +22,15 @@ import {
   Eye,
   EyeOff,
   User,
+  Calendar,
+  Trash2,
+  RefreshCw,
 } from "lucide-react";
-
-import {
-  updateUserAPI,
-  uploadAvatarAPI,
-} from "../../service/AdminPageAPI/user.api";
+import { updateUserAPI, uploadAvatarAPI } from "../../service/AdminPageAPI/user.api";
+import { bookingApi } from "../../service/bookRoom.api";
 import AppHeaderInto from "../../Component/hearderinto";
 import Footer from "../../Component/footer";
+import dayjs from "dayjs";
 import type { Users } from "../../interfaces/auth.interface";
 import { create } from "zustand";
 
@@ -65,14 +77,20 @@ const UserProfile: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // === Booking data ===
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loadingBookings, setLoadingBookings] = useState(false);
+
   useEffect(() => {
     const storedUser = getUserFromStorage();
     if (storedUser) {
       setUser(storedUser);
       form.setFieldsValue(storedUser);
+      loadBookings(storedUser.id);
     }
   }, [form, setUser]);
 
+  // ===== Avatar logic =====
   const handleAvatarClick = () => fileInputRef.current?.click();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,7 +121,6 @@ const UserProfile: React.FC = () => {
     });
   };
 
-  // ✅ Upload avatar
   const handleSaveAvatar = async () => {
     if (!pendingAvatar || !user) {
       message.warning("Vui lòng chọn ảnh trước!");
@@ -129,6 +146,35 @@ const UserProfile: React.FC = () => {
     }
   };
 
+  // ===== Booking logic =====
+  const loadBookings = async (userId?: number) => {
+    const uid = userId || user?.id;
+    if (!uid) return;
+
+    setLoadingBookings(true);
+    try {
+      const data = await bookingApi.getAll();
+      const userBookings = data.filter((b: any) => b.maNguoiDung === uid);
+      setBookings(userBookings);
+    } catch (err) {
+      console.error("❌ Lỗi khi tải lịch sử đặt phòng:", err);
+      message.error("Không thể tải lịch sử đặt phòng!");
+    } finally {
+      setLoadingBookings(false);
+    }
+  };
+
+  const handleDeleteBooking = async (id: number) => {
+    try {
+      await bookingApi.delete(id);
+      message.success("🗑️ Đã xoá đơn đặt phòng!");
+      loadBookings();
+    } catch {
+      message.error("Không thể xoá đơn này!");
+    }
+  };
+
+  // ===== Edit info logic =====
   const handleEdit = () => {
     setIsEditing(true);
     form.setFieldsValue(user || {});
@@ -151,7 +197,7 @@ const UserProfile: React.FC = () => {
       setUser(newUser);
       localStorage.setItem("user", JSON.stringify(newUser));
 
-      message.success("Cập nhật thông tin thành công!");
+      message.success("✅ Cập nhật thông tin thành công!");
       setIsEditing(false);
     } catch (err: any) {
       console.error("❌ Update error:", err);
@@ -160,11 +206,7 @@ const UserProfile: React.FC = () => {
   };
 
   if (!user)
-    return (
-      <div className="text-center py-10">
-        Không có thông tin người dùng!
-      </div>
-    );
+    return <div className="text-center py-10">Không có thông tin người dùng!</div>;
 
   return (
     <div className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen pb-12">
@@ -180,9 +222,7 @@ const UserProfile: React.FC = () => {
             </span>
             Hồ sơ cá nhân
           </h1>
-          <p className="text-gray-500 mt-2">
-            Quản lý thông tin tài khoản của bạn
-          </p>
+          <p className="text-gray-500 mt-2">Quản lý thông tin tài khoản của bạn</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -216,7 +256,6 @@ const UserProfile: React.FC = () => {
             </div>
 
             <h2 className="text-xl font-bold mt-4">Xin chào, {user.name}</h2>
-            {/* 🆔 Thêm mã người dùng */}
             <p className="text-gray-500 text-sm">
               Mã người dùng: <span className="font-medium">#{user.id}</span>
             </p>
@@ -230,9 +269,7 @@ const UserProfile: React.FC = () => {
                     : "bg-green-100 text-green-700"
                 }`}
               >
-                {user.role === "ADMIN"
-                  ? "👑 Quản trị viên"
-                  : "👤 Người dùng"}
+                {user.role === "ADMIN" ? "👑 Quản trị viên" : "👤 Người dùng"}
               </span>
             </div>
 
@@ -252,8 +289,7 @@ const UserProfile: React.FC = () => {
                   onClick={() => {
                     setPendingAvatar(null);
                     setPreviewAvatar(null);
-                    if (fileInputRef.current)
-                      fileInputRef.current.value = "";
+                    if (fileInputRef.current) fileInputRef.current.value = "";
                   }}
                 >
                   Hủy
@@ -299,7 +335,6 @@ const UserProfile: React.FC = () => {
           >
             <Form form={form} layout="vertical" disabled={!isEditing}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* 🆔 Mã người dùng */}
                 <Form.Item label="Mã người dùng">
                   <Input value={user.id} disabled />
                 </Form.Item>
@@ -336,11 +371,7 @@ const UserProfile: React.FC = () => {
                     <Button
                       type="text"
                       icon={
-                        showPassword ? (
-                          <EyeOff size={16} />
-                        ) : (
-                          <Eye size={16} />
-                        )
+                        showPassword ? <EyeOff size={16} /> : <Eye size={16} />
                       }
                       onClick={() => setShowPassword(!showPassword)}
                     />
@@ -351,6 +382,80 @@ const UserProfile: React.FC = () => {
             </Form>
           </Card>
         </div>
+
+        {/* 🧾 Lịch sử đặt phòng */}
+        <Card
+          className="shadow-lg border-0 mt-8"
+          title={
+            <div className="flex justify-between items-center">
+              <span className="font-semibold text-gray-800 text-lg flex items-center gap-2">
+                <Calendar size={18} /> Lịch sử đặt phòng
+              </span>
+              <Button
+                icon={<RefreshCw size={16} />}
+                onClick={() => loadBookings()}
+                loading={loadingBookings}
+              >
+                Làm mới
+              </Button>
+            </div>
+          }
+        >
+          <Spin spinning={loadingBookings}>
+            {bookings.length === 0 ? (
+              <div className="text-center text-gray-500 py-6">
+                Bạn chưa có đơn đặt phòng nào.
+              </div>
+            ) : (
+              <Table
+                dataSource={bookings.map((b, i) => ({ key: i, ...b }))}
+                pagination={{ pageSize: 5 }}
+                columns={[
+                  {
+                    title: "Mã đơn",
+                    dataIndex: "id",
+                    render: (id) => <span className="font-semibold">#{id}</span>,
+                  },
+                  {
+                    title: "Mã phòng",
+                    dataIndex: "maPhong",
+                  },
+                  {
+                    title: "Ngày đến",
+                    dataIndex: "ngayDen",
+                    render: (d) => dayjs(d).format("DD/MM/YYYY"),
+                  },
+                  {
+                    title: "Ngày đi",
+                    dataIndex: "ngayDi",
+                    render: (d) => dayjs(d).format("DD/MM/YYYY"),
+                  },
+                  {
+                    title: "Số khách",
+                    dataIndex: "soLuongKhach",
+                  },
+                  {
+                    title: "Thao tác",
+                    key: "actions",
+                    render: (_, record) => (
+                      <Popconfirm
+                        title="Xoá đơn đặt phòng"
+                        description="Bạn có chắc muốn xoá đơn này không?"
+                        okText="Xoá"
+                        cancelText="Hủy"
+                        onConfirm={() => handleDeleteBooking(record.id)}
+                      >
+                        <Button danger icon={<Trash2 size={16} />}>
+                          Xoá
+                        </Button>
+                      </Popconfirm>
+                    ),
+                  },
+                ]}
+              />
+            )}
+          </Spin>
+        </Card>
 
         <div className="mt-8">
           <Footer />

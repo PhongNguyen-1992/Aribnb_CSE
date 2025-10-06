@@ -9,7 +9,6 @@ import {
   Pagination,
   Empty,
   theme,
-  Typography,
 } from "antd";
 
 import Visit from "./Visit";
@@ -17,7 +16,7 @@ import { getLocationsPagingAPI } from "../../service/location.api";
 import type { Location, PaginatedLocation } from "../../interfaces/location.interface";
 
 const { useToken } = theme;
-const { Title, Text } = Typography;
+
 
 const PAGE_SIZE_OPTIONS = [4, 8, 12, 16, 20, 24];
 
@@ -123,26 +122,7 @@ const ListVisit: React.FC = () => {
   return (
     <div style={containerStyle}>
       <div style={{ padding: `${token.paddingXL}px 0` }}>
-        {/* Header */}
-        <div style={{ marginBottom: token.marginXL, textAlign: "center" }}>
-          <Title
-            level={2}
-            style={{ marginBottom: token.marginXS, color: token.colorText }}
-          >
-            Khám Phá Các Điểm Đến
-          </Title>
-          <Text type="secondary" style={{ fontSize: token.fontSizeLG }}>
-            Chọn địa điểm yêu thích để xem các phòng nghỉ tuyệt vời
-          </Text>
-          {data && (
-            <div style={{ marginTop: token.marginSM }}>
-              <Text type="secondary" style={{ fontSize: token.fontSize }}>
-                Hiển thị {locations.length} trong tổng số {totalRow} địa điểm
-                {totalPage > 1 && ` • Trang ${currentPage}/${totalPage}`}
-              </Text>
-            </div>
-          )}
-        </div>
+        {/* Header */}      
 
         {/* Location Cards */}
         <div style={{ position: "relative", minHeight: isEmpty ? 200 : "auto" }}>
