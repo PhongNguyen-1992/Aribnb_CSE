@@ -41,8 +41,7 @@ export const userAuthStore = create<AuthStore>((set) => ({
     }
   },
 
-  clearUser: () => {
-    console.log("🚪 Clearing user from store");
+  clearUser: () => {  
 
     // Reset store + localStorage
     set({ user: null, isAuthenticated: false });
@@ -75,20 +74,3 @@ if (typeof window !== "undefined") {
     }
   });
 }
-
-// ===== DEBUG HELPER =====
-export const debugStoreState = () => {
-  const state = userAuthStore.getState();
-  console.log("🔍 STORE DEBUG:");
-  console.log("- Current user:", state.user);
-  console.log("- Is authenticated:", state.isAuthenticated);
-  console.log("- User ID:", state.user?.id);
-  console.log("- User name:", state.user?.name);
-  console.log("- User email:", state.user?.email);
-
-  const localStorageUser = localStorage.getItem("user");
-  console.log(
-    "💾 localStorage user:",
-    localStorageUser ? JSON.parse(localStorageUser) : null
-  );
-};

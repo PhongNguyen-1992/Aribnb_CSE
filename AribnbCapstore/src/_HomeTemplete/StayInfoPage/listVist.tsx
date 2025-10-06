@@ -6,50 +6,45 @@ import {
   Spin,
   Alert,
   Button,
-  Typography,
   Pagination,
   Empty,
   theme,
+  Typography,
 } from "antd";
-import { useNavigate } from "react-router-dom";
-import Visit from "./Visit";
-import type { PaginatedLocationResponse } from "../../interfaces/location.interface";
-import { getLocationsPagingAPI } from "../../service/location.api";
 
+import Visit from "./Visit";
+import { getLocationsPagingAPI } from "../../service/location.api";
+import type { Location, PaginatedLocation } from "../../interfaces/location.interface";
 
 const { useToken } = theme;
+const { Title, Text } = Typography;
 
 const PAGE_SIZE_OPTIONS = [4, 8, 12, 16, 20, 24];
 
 const ListVisit: React.FC = () => {
-    const { token } = useToken();
+  const { token } = useToken();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(4);
 
-  const { data, isLoading, isError, error, isFetching } = useQuery<
-    PaginatedLocationResponse,
-    Error
-  >({
+  // ✅ type đúng cho react-query
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isFetching,
+  } = useQuery<PaginatedLocation<Location>, Error>({
     queryKey: ["locations", currentPage, pageSize],
-    queryFn: async () => {
-      const response = await getLocationsPagingAPI(currentPage, pageSize);
-      console.log('Raw API Response:', response);
-      return response;
-    },
+    queryFn: () => getLocationsPagingAPI(currentPage, pageSize),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     retry: 3,
-    retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    placeholderData: (previousData) => previousData,
+    retryDelay: (attemptIndex: number) =>
+      Math.min(1000 * 2 ** attemptIndex, 30000),
+    placeholderData: (prev) => prev,
   });
 
-  // const handleViewRooms = useCallback(
-  //   (locationId: number, locationName: string) => {
-  //     navigate(`/rooms?locationId=${locationId}&locationName=${encodeURIComponent(locationName)}`);
-  //   },
-  //   [navigate]
-  // );
-
+  // ✅ Pagination change
   const handlePageChange = useCallback(
     (page: number, size?: number) => {
       setCurrentPage(page);
@@ -62,9 +57,12 @@ const ListVisit: React.FC = () => {
     [pageSize]
   );
 
-  const handleShowTotal = useCallback((total: number, range: [number, number]) => {
-    return `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} địa điểm`;
-  }, []);
+  // ✅ Show total
+  const handleShowTotal = useCallback(
+    (total: number, range: [number, number]) =>
+      `Hiển thị ${range[0]}–${range[1]} trong tổng số ${total} địa điểm`,
+    []
+  );
 
   const containerStyle: React.CSSProperties = {
     maxWidth: 1200,
@@ -72,6 +70,7 @@ const ListVisit: React.FC = () => {
     padding: `0 ${token.padding}px`,
   };
 
+  // ✅ Loading
   if (isLoading && !data) {
     return (
       <div style={containerStyle}>
@@ -90,6 +89,7 @@ const ListVisit: React.FC = () => {
     );
   }
 
+  // ✅ Error
   if (isError) {
     return (
       <div style={containerStyle}>
@@ -100,7 +100,11 @@ const ListVisit: React.FC = () => {
             description={error?.message || "Không thể tải danh sách địa điểm"}
             showIcon
             action={
-              <Button size="small" type="primary" onClick={() => window.location.reload()}>
+              <Button
+                size="small"
+                type="primary"
+                onClick={() => window.location.reload()}
+              >
                 Thử lại
               </Button>
             }
@@ -110,7 +114,8 @@ const ListVisit: React.FC = () => {
     );
   }
 
-  const locations = data?.data || [];
+  // ✅ Dữ liệu chính xác
+  const locations: Location[] = data?.items || [];
   const totalRow = data?.totalRow || 0;
   const totalPage = Math.ceil(totalRow / pageSize);
   const isEmpty = locations.length === 0;
@@ -119,8 +124,11 @@ const ListVisit: React.FC = () => {
     <div style={containerStyle}>
       <div style={{ padding: `${token.paddingXL}px 0` }}>
         {/* Header */}
-        {/* <div style={{ marginBottom: token.marginXL, textAlign: "center" }}>
-          <Title level={2} style={{ marginBottom: token.marginXS, color: token.colorText }}>
+        <div style={{ marginBottom: token.marginXL, textAlign: "center" }}>
+          <Title
+            level={2}
+            style={{ marginBottom: token.marginXS, color: token.colorText }}
+          >
             Khám Phá Các Điểm Đến
           </Title>
           <Text type="secondary" style={{ fontSize: token.fontSizeLG }}>
@@ -134,7 +142,7 @@ const ListVisit: React.FC = () => {
               </Text>
             </div>
           )}
-        </div> */}
+        </div>
 
         {/* Location Cards */}
         <div style={{ position: "relative", minHeight: isEmpty ? 200 : "auto" }}>
@@ -167,7 +175,7 @@ const ListVisit: React.FC = () => {
             <Row gutter={[24, 24]}>
               {locations.map((location) => (
                 <Col key={location.id} xs={24} sm={12} md={8} lg={6}>
-                  <Visit location={location}/>
+                  <Visit location={location} />
                 </Col>
               ))}
             </Row>
@@ -176,12 +184,12 @@ const ListVisit: React.FC = () => {
 
         {/* Pagination */}
         {totalPage > 1 && (
-          <div 
-            style={{ 
+          <div
+            style={{
               marginTop: token.marginXL,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center'
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
             <Pagination
@@ -193,8 +201,8 @@ const ListVisit: React.FC = () => {
               showSizeChanger
               showQuickJumper
               showTotal={handleShowTotal}
-              pageSizeOptions={PAGE_SIZE_OPTIONS.map((opt) => opt.toString())}
-              itemRender={(page, type, originalElement) => {
+              pageSizeOptions={PAGE_SIZE_OPTIONS.map(String)}
+              itemRender={(_, type, originalElement) => {
                 if (type === "prev") {
                   return (
                     <Button size="small" type="text" disabled={currentPage === 1}>
@@ -217,7 +225,7 @@ const ListVisit: React.FC = () => {
               }}
             />
           </div>
-        )}      
+        )}
       </div>
     </div>
   );

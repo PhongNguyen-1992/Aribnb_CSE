@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import * as THREE from "three";
+import { userAuthStore } from "../store";
 
 const AuthLayout: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -8,15 +9,29 @@ const AuthLayout: React.FC = () => {
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const particlesRef = useRef<THREE.Points | null>(null);
+  const { user } = userAuthStore();
+
+  // ✅ Kiểm tra role trước khi render UI
+  if (user?.role === "ADMIN") {
+    return <Navigate to="/admin" replace />;
+  }
+
+  if (user?.role === "USER") {
+    return <Navigate to="/" replace />;
+  }
+
+  // fallback: nếu có role lạ thì quay về home
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Scene setup
+    // --- Scene setup ---
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    // Camera setup
     const camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
@@ -26,7 +41,6 @@ const AuthLayout: React.FC = () => {
     camera.position.z = 5;
     cameraRef.current = camera;
 
-    // Renderer setup
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
       alpha: true,
@@ -36,7 +50,7 @@ const AuthLayout: React.FC = () => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     rendererRef.current = renderer;
 
-    // Create particles
+    // --- Particles setup ---
     const particlesGeometry = new THREE.BufferGeometry();
     const particlesCount = 3000;
     const posArray = new Float32Array(particlesCount * 3);
@@ -50,7 +64,6 @@ const AuthLayout: React.FC = () => {
       new THREE.BufferAttribute(posArray, 3)
     );
 
-    // Create gradient texture for particles
     const canvas = document.createElement("canvas");
     canvas.width = 32;
     canvas.height = 32;
@@ -77,11 +90,10 @@ const AuthLayout: React.FC = () => {
     scene.add(particlesMesh);
     particlesRef.current = particlesMesh;
 
-    // Add ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
-    // Animation
+    // --- Animation ---
     let mouseX = 0;
     let mouseY = 0;
     let targetX = 0;
@@ -96,8 +108,6 @@ const AuthLayout: React.FC = () => {
 
     const animate = () => {
       requestAnimationFrame(animate);
-
-      // Smooth mouse following
       targetX += (mouseX - targetX) * 0.05;
       targetY += (mouseY - targetY) * 0.05;
 
@@ -112,10 +122,8 @@ const AuthLayout: React.FC = () => {
 
     animate();
 
-    // Handle resize
     const handleResize = () => {
       if (!cameraRef.current || !rendererRef.current) return;
-      
       cameraRef.current.aspect = window.innerWidth / window.innerHeight;
       cameraRef.current.updateProjectionMatrix();
       rendererRef.current.setSize(window.innerWidth, window.innerHeight);
@@ -123,20 +131,12 @@ const AuthLayout: React.FC = () => {
 
     window.addEventListener("resize", handleResize);
 
-    // Cleanup
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", handleResize);
-      
-      if (rendererRef.current) {
-        rendererRef.current.dispose();
-      }
-      if (particlesGeometry) {
-        particlesGeometry.dispose();
-      }
-      if (particlesMaterial) {
-        particlesMaterial.dispose();
-      }
+      renderer.dispose();
+      particlesGeometry.dispose();
+      particlesMaterial.dispose();
     };
   }, []);
 
@@ -147,8 +147,7 @@ const AuthLayout: React.FC = () => {
         ref={canvasRef}
         className="fixed top-0 left-0 w-full h-full -z-10"
         style={{
-          // background: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
-            background: "linear-gradient(135deg, #000000 0%, #111827 50%, #1f2937 100%)",
+          background: "linear-gradient(135deg, #000000 0%, #111827 50%, #1f2937 100%)",
         }}
       />
 
@@ -164,7 +163,6 @@ const AuthLayout: React.FC = () => {
       {/* Content Container */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          {/* Glass Card Effect */}
           <div
             className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-8 border border-white/20"
             style={{

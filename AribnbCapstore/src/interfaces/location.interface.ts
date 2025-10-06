@@ -1,3 +1,5 @@
+// interfaces/location.interface.ts
+
 export interface Location {
   id: number;
   tenViTri: string;
@@ -6,9 +8,10 @@ export interface Location {
   hinhAnh: string;
 }
 
-export interface PaginatedLocationResponse {
+export interface PaginatedLocation<T> {
+  items: T[];
   pageIndex: number;
   pageSize: number;
   totalRow: number;
-  data: Location[];
+  totalPages: number;
 }

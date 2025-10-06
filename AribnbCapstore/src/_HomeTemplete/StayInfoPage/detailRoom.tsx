@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { roomApi } from '../../service/detail.api';
 import type { Room } from '../../interfaces/detail.interface';
-import AppHeader from '../../Component/hearder';
 import AppHeaderInto from '../../Component/hearderinto';
 import Footer from '../../Component/footer';
 

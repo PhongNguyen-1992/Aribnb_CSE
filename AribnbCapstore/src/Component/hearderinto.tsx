@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Layout, Button, Dropdown, Avatar, message } from "antd";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink} from "react-router-dom";
 import {
   Search,
   User,
@@ -16,8 +16,7 @@ import Logo from "./logo";
 
 const { Header } = Layout;
 
-const AppHeaderInto: React.FC = () => {
-  const location = useLocation();
+const AppHeaderInto: React.FC = () => {  
   const { clearUser } = userAuthStore((state: any) => state);
   const [user, setUser] = useState<LoginApiResponse | null>(null);
 
