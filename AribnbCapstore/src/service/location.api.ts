@@ -3,16 +3,19 @@ import api from "./api";
 
 export const getLocationsPagingAPI = async (
   pageIndex: number = 1,
-  pageSize: number = 4
+  pageSize: number = 4,
+  keyword: string = ""
 ): Promise<PaginatedLocation<Location>> => {
   const res = await api.get(`/vi-tri/phan-trang-tim-kiem`, {
-    params: { pageIndex, pageSize },
+    params: { 
+      pageIndex, 
+      pageSize,
+      ...(keyword.trim() && { keyword: keyword.trim() }) // gửi keyword nếu có
+    },
   });
 
-  // Giải cấu trúc dữ liệu trả về thực tế
   const data = res.data?.content;
 
-  // Đảm bảo return đúng định dạng interface
   return {
     items: data?.data || data?.items || [],
     pageIndex: data?.pageIndex || pageIndex,

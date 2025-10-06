@@ -14,8 +14,16 @@ const CommentList: React.FC<CommentListProps> = ({ roomId }) => {
   const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
 
-  // Lấy bình luận
+  // ✅ Theo dõi kích thước màn hình
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // ✅ Lấy bình luận
   useEffect(() => {
     const fetchComments = async () => {
       try {
@@ -32,15 +40,18 @@ const CommentList: React.FC<CommentListProps> = ({ roomId }) => {
     if (roomId) fetchComments();
   }, [roomId]);
 
-  // Auto slide
+  // ✅ Auto slide
   useEffect(() => {
-    if (paused || comments.length <= 4) return;
+    if (paused || comments.length <= (isMobile ? 1 : 4)) return;
     const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % Math.ceil(comments.length / 4));
+      setIndex(
+        (prev) => (prev + 1) % Math.ceil(comments.length / (isMobile ? 1 : 4))
+      );
     }, 4000);
     return () => clearInterval(timer);
-  }, [paused, comments]);
+  }, [paused, comments, isMobile]);
 
+  // ✅ Loading
   if (loading)
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
@@ -50,6 +61,7 @@ const CommentList: React.FC<CommentListProps> = ({ roomId }) => {
       </div>
     );
 
+  // ✅ Empty
   if (!comments.length)
     return (
       <Empty
@@ -58,34 +70,39 @@ const CommentList: React.FC<CommentListProps> = ({ roomId }) => {
       />
     );
 
-  // Chia comments thành từng nhóm 4 (2x2)
+  // ✅ Chia slide: Mobile = 1 card, Desktop = 4 card (2 hàng × 2 cột)
+  const groupSize = isMobile ? 1 : 4;
   const slides: BinhLuan[][] = [];
-  for (let i = 0; i < comments.length; i += 4) {
-    slides.push(comments.slice(i, i + 4));
+  for (let i = 0; i < comments.length; i += groupSize) {
+    slides.push(comments.slice(i, i + groupSize));
   }
 
   return (
     <div
-      className="relative mt-16 mx-auto max-w-6xl bg-white/70 backdrop-blur-md rounded-2xl shadow-md p-8 border border-gray-100"
+      className="relative mt-16 mx-auto max-w-6xl bg-white/70 backdrop-blur-md rounded-2xl shadow-md p-6 sm:p-8 border border-gray-100"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       {/* Tiêu đề */}
-      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-10 bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">
+      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-10 bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">
         Đánh giá nổi bật
       </h2>
 
-      {/* Carousel 2 hàng mượt */}
+      {/* Carousel */}
       <div className="overflow-hidden px-2">
         <motion.div
-          className="flex gap-6"
+          className="flex"
           animate={{ x: `-${index * 100}%` }}
           transition={{ type: "spring", stiffness: 60, damping: 18 }}
         >
           {slides.map((slide, slideIndex) => (
             <div
               key={slideIndex}
-              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-6 flex-shrink-0 w-full"
+              className={`grid flex-shrink-0 w-full ${
+                isMobile
+                  ? "grid-cols-1"
+                  : "grid-cols-2 grid-rows-2 gap-6" // ✅ 2 cột × 2 hàng
+              } gap-6`}
             >
               {slide.map((comment) => (
                 <CommentCard key={comment.id} comment={comment} />
@@ -95,7 +112,7 @@ const CommentList: React.FC<CommentListProps> = ({ roomId }) => {
         </motion.div>
       </div>
 
-      {/* Indicator dots */}
+      {/* Dots */}
       <div className="flex justify-center mt-6 gap-2">
         {slides.map((_, i) => (
           <button

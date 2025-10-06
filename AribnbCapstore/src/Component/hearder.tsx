@@ -10,12 +10,10 @@ import {
   LogOut,
   LogIn, 
   AlignJustify,
-  Calendar,
-  MapPin,
+  Calendar, 
   Users,
   Star,
-  Sparkles,
-  Plane,
+  Sparkles,  
   Shield,
   UserCircle, 
 } from "lucide-react";
@@ -33,41 +31,12 @@ interface MenuItem {
   to: string; // Add the 'to' property directly to MenuItem
 }
 
-interface SearchSection {
-  key: string;
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  gradient: string;
-}
 
 interface AnimatedSearchBarProps {
   isMobile: boolean;
   onSearch: () => void;
 }
 
-// Animated Logo Component inspired by React Bits
-const AnimatedLogo: React.FC = () => (
-  <div className="flex items-center gap-3 group cursor-pointer">
-    <div className="relative">
-      <div className="w-12 h-12 bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-lg transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-12">
-        <Sparkles className="w-6 h-6 text-white animate-pulse" />
-      </div>
-      {/* Floating particles */}
-      <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-300 rounded-full opacity-0 group-hover:opacity-100 animate-ping transition-opacity duration-300" />
-      <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-pink-400 rounded-full opacity-0 group-hover:opacity-100 animate-pulse transition-opacity duration-500 delay-200" />
-    </div>
-    <div className="hidden sm:block">
-      <h1 className="text-2xl font-bold text-white m-0 tracking-tight bg-gradient-to-r from-white to-blue-100 bg-clip-text transform transition-all duration-300 group-hover:scale-105">
-        TravelHub
-      </h1>
-      <p className="text-xs text-white/90 m-0 font-medium transform transition-all duration-300 group-hover:text-yellow-200 flex items-center gap-1">
-        <Plane className="w-3 h-3" />
-        Khám phá thế giới
-      </p>
-    </div>
-  </div>
-);
 
 // Animated Background Component
 const AnimatedBackground: React.FC = () => (
@@ -98,7 +67,6 @@ const AnimatedBackground: React.FC = () => (
 
 // Animated Search Bar inspired by React Bits
 const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({ isMobile, onSearch }) => {
-  const [focused, setFocused] = useState<string | null>(null);
   
   if (isMobile) {
     return (
@@ -133,97 +101,10 @@ const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({ isMobile, onSearc
         </div>
       </div>
     );
-  }
-
-  const searchSections: SearchSection[] = [
-    { 
-      key: 'location', 
-      icon: <MapPin className="w-5 h-5 text-pink-500" />, 
-      title: 'Địa điểm', 
-      subtitle: 'Tìm kiếm điểm đến',
-      gradient: 'from-pink-100 to-rose-100'
-    },
-    { 
-      key: 'checkin', 
-      icon: <Calendar className="w-5 h-5 text-blue-500" />, 
-      title: 'Nhận phòng', 
-      subtitle: 'Thêm ngày',
-      gradient: 'from-blue-100 to-sky-100'
-    },
-    { 
-      key: 'checkout', 
-      icon: <Calendar className="w-5 h-5 text-green-500" />, 
-      title: 'Trả phòng', 
-      subtitle: 'Thêm ngày',
-      gradient: 'from-green-100 to-emerald-100'
-    },
-    { 
-      key: 'guests', 
-      icon: <Users className="w-5 h-5 text-purple-500" />, 
-      title: 'Khách', 
-      subtitle: 'Thêm khách',
-      gradient: 'from-purple-100 to-violet-100'
-    }
-  ];
-
-  return (
-    <div className="flex justify-center pb-8 px-6">
-      <div className="bg-white/95 backdrop-blur-2xl rounded-full p-3 flex items-center shadow-2xl border border-white/40 w-full max-w-5xl transform transition-all duration-500 hover:shadow-3xl hover:scale-[1.02]">
-        {searchSections.map((section, index) => (
-          <div
-            key={section.key}
-            className={`flex-1 px-6 py-5 cursor-pointer transition-all duration-300 group relative overflow-hidden ${
-              index === 0 ? 'rounded-l-full' : index === searchSections.length - 1 ? 'rounded-r-full' : ''
-            } ${index < searchSections.length - 1 ? 'border-r border-gray-200' : ''} ${
-              focused === section.key ? `bg-gradient-to-br ${section.gradient} transform scale-105 shadow-lg z-10` : 'hover:bg-gray-50/80'
-            }`}
-            onMouseEnter={() => setFocused(section.key)}
-            onMouseLeave={() => setFocused(null)}
-          >
-            {/* Animated background on hover */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${section.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-              index === 0 ? 'rounded-l-full' : index === searchSections.length - 1 ? 'rounded-r-full' : ''
-            }`} />
-            
-            <div className="relative z-10 flex items-center gap-3">
-              <div className="transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-12">
-                {section.icon}
-              </div>
-              <div>
-                <p className="text-sm font-bold text-gray-800 m-0 group-hover:text-gray-900 transition-colors duration-300">
-                  {section.title}
-                </p>
-                <p className="text-sm text-gray-600 m-0 group-hover:text-gray-700 transition-colors duration-300">
-                  {section.subtitle}
-                </p>
-              </div>
-            </div>
-
-            {/* Ripple effect */}
-            {focused === section.key && (
-              <div className="absolute inset-0 animate-ping bg-white/20 rounded-full" />
-            )}
-          </div>
-        ))}
-        
-        {/* Animated Search Button */}
-        <div className="pl-4 pr-2">
-          <Button
-            type="primary"
-            shape="circle"
-            size="large"
-            icon={<Search className="w-6 h-6" />}
-            onClick={onSearch}
-            className="bg-gradient-to-r from-pink-500 via-red-500 to-orange-500 border-0 shadow-xl hover:shadow-2xl transform transition-all duration-300 hover:scale-110 hover:rotate-12 w-16 h-16 flex items-center justify-center animate-pulse hover:animate-none"
-          />
-        </div>
-      </div>
-    </div>
-  );
+  }  
+ 
 };
 
-// Main Component
-const TravelHubLogo = AnimatedLogo;
 
 const AppHeader: React.FC = () => {
   const location = useLocation();
@@ -491,7 +372,7 @@ const AppHeader: React.FC = () => {
       <Drawer
         title={
           <div className="flex items-center gap-4">
-            <TravelHubLogo />
+            <Logo />
           </div>
         }
         placement="right"

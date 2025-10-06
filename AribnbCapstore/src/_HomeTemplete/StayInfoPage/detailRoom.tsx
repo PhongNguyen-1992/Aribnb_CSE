@@ -25,6 +25,7 @@ import AppHeaderInto from "../../Component/hearderinto";
 import Footer from "../../Component/footer";
 import BookingModal from "./ModalBooking";
 import CommentList from "./Reviewer/ListReview";
+import AppHeader from "../../Component/hearder";
 
 const RoomDetail = () => {
   const { id, tenViTri } = useParams<{ id: string; tenViTri: string }>();
@@ -103,7 +104,7 @@ const RoomDetail = () => {
       {/* Header */}
       <div className="bg-white shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4">
-          <AppHeaderInto />
+          <AppHeader />
         </div>
       </div>
 

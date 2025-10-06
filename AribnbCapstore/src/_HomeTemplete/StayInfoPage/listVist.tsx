@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Row,
@@ -8,15 +8,20 @@ import {
   Button,
   Pagination,
   Empty,
+  Input,
   theme,
 } from "antd";
+import { motion, AnimatePresence } from "framer-motion";
 
 import Visit from "./Visit";
 import { getLocationsPagingAPI } from "../../service/location.api";
-import type { Location, PaginatedLocation } from "../../interfaces/location.interface";
+import type {
+  Location,
+  PaginatedLocation,
+} from "../../interfaces/location.interface";
 
 const { useToken } = theme;
-
+const { Search } = Input;
 
 const PAGE_SIZE_OPTIONS = [4, 8, 12, 16, 20, 24];
 
@@ -24,26 +29,26 @@ const ListVisit: React.FC = () => {
   const { token } = useToken();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(4);
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [debouncedValue, setDebouncedValue] = useState<string>("");
 
-  // ✅ type đúng cho react-query
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-    isFetching,
-  } = useQuery<PaginatedLocation<Location>, Error>({
-    queryKey: ["locations", currentPage, pageSize],
-    queryFn: () => getLocationsPagingAPI(currentPage, pageSize),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    retry: 3,
-    retryDelay: (attemptIndex: number) =>
-      Math.min(1000 * 2 ** attemptIndex, 30000),
-    placeholderData: (prev) => prev,
+  // 🕒 Debounce logic (mượt khi người dùng gõ)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(searchValue), 500);
+    return () => clearTimeout(timer);
+  }, [searchValue]);
+
+  // ✅ Query API
+  const { data, isLoading, isError, error, isFetching, refetch } = useQuery<
+    PaginatedLocation<Location>,
+    Error
+  >({
+    queryKey: ["locations", currentPage, pageSize, debouncedValue],
+    queryFn: () => getLocationsPagingAPI(currentPage, pageSize, debouncedValue),   
+    staleTime: 1000 * 60 * 5,
   });
 
-  // ✅ Pagination change
+  // ✅ Pagination
   const handlePageChange = useCallback(
     (page: number, size?: number) => {
       setCurrentPage(page);
@@ -56,12 +61,8 @@ const ListVisit: React.FC = () => {
     [pageSize]
   );
 
-  // ✅ Show total
-  const handleShowTotal = useCallback(
-    (total: number, range: [number, number]) =>
-      `Hiển thị ${range[0]}–${range[1]} trong tổng số ${total} địa điểm`,
-    []
-  );
+  const handleShowTotal = (total: number, range: [number, number]) =>
+    `Hiển thị ${range[0]}–${range[1]} trong tổng số ${total} địa điểm`;
 
   const containerStyle: React.CSSProperties = {
     maxWidth: 1200,
@@ -69,7 +70,7 @@ const ListVisit: React.FC = () => {
     padding: `0 ${token.padding}px`,
   };
 
-  // ✅ Loading
+  // ✅ Loading toàn phần ban đầu
   if (isLoading && !data) {
     return (
       <div style={containerStyle}>
@@ -99,11 +100,7 @@ const ListVisit: React.FC = () => {
             description={error?.message || "Không thể tải danh sách địa điểm"}
             showIcon
             action={
-              <Button
-                size="small"
-                type="primary"
-                onClick={() => window.location.reload()}
-              >
+              <Button size="small" type="primary" onClick={() => refetch()}>
                 Thử lại
               </Button>
             }
@@ -122,19 +119,26 @@ const ListVisit: React.FC = () => {
   return (
     <div style={containerStyle}>
       <div style={{ padding: `${token.paddingXL}px 0` }}>
-        {/* Header */}      
+        {/* 🔍 Thanh tìm kiếm (mượt hơn) */}
+        <div style={{ marginBottom: token.marginLG, textAlign: "center" }}>
+          <Search
+            placeholder="Tìm kiếm địa điểm..."
+            allowClear
+            size="large"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            style={{ maxWidth: 400 }}
+          />
+        </div>
 
-        {/* Location Cards */}
+        {/* Danh sách địa điểm */}
         <div style={{ position: "relative", minHeight: isEmpty ? 200 : "auto" }}>
           {isFetching && (
             <div
               style={{
                 position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: token.colorBgMask,
+                inset: 0,
+                background: "rgba(255,255,255,0.6)",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
@@ -146,20 +150,41 @@ const ListVisit: React.FC = () => {
             </div>
           )}
 
-          {isEmpty ? (
-            <Empty
-              description="Không tìm thấy địa điểm nào"
-              style={{ padding: `${token.paddingXL * 2}px 0` }}
-            />
-          ) : (
-            <Row gutter={[24, 24]}>
-              {locations.map((location) => (
-                <Col key={location.id} xs={24} sm={12} md={8} lg={6}>
-                  <Visit location={location} />
-                </Col>
-              ))}
-            </Row>
-          )}
+          <AnimatePresence mode="wait">
+            {isEmpty ? (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <Empty
+                  description={
+                    debouncedValue
+                      ? "Không tìm thấy địa điểm phù hợp"
+                      : "Không có địa điểm nào"
+                  }
+                  style={{ padding: `${token.paddingXL * 2}px 0` }}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="list"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Row gutter={[24, 24]}>
+                  {locations.map((location) => (
+                    <Col key={location.id} xs={24} sm={12} md={8} lg={6}>
+                      <Visit location={location} />
+                    </Col>
+                  ))}
+                </Row>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Pagination */}
