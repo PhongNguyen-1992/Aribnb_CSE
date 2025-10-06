@@ -274,7 +274,7 @@ const AppHeader: React.FC = () => {
     items: [
       {
         key: "profile",
-        label: <NavLink to="/profile">Thông tin cá nhân</NavLink>,
+        label: <NavLink to="/UserProfile">Thông tin cá nhân</NavLink>,
         icon: <UserCircle className="h-4 w-4 text-blue-500" />,
       },
       ...(user?.role === "ADMIN" ? [{

@@ -12,6 +12,7 @@ const AuthLayout = lazy(() => import("../_AuthenTemplete"));
 const Login = lazy(() => import("../_AuthenTemplete/Login/index"));
 const Register = lazy(() => import("../_AuthenTemplete/Register/index"));
 const RoomDetail = lazy(() => import("../_HomeTemplete/StayInfoPage/detailRoom"));
+const UserProfile = lazy(() => import("../_HomeTemplete/ProfileUser/index"));
 
 
 const withSuspense = (Component: LazyExoticComponent<FC>) => (
@@ -54,6 +55,9 @@ export const router: RouteObject[] = [
       { path: "TraiNghiem", element: withSuspense(TraiNghiem) },
       { path: "DichVu", element: withSuspense(DichVu) },
     ],
+  },{
+    path: "/UserProfile",
+    element: withSuspense(UserProfile),
   },
   {
     path: "/room-detail/:id/:tenViTri", 

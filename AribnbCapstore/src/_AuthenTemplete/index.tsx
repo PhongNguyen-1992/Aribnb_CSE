@@ -11,17 +11,15 @@ const AuthLayout: React.FC = () => {
   const particlesRef = useRef<THREE.Points | null>(null);
   const { user } = userAuthStore();
 
-  // ✅ Kiểm tra role trước khi render UI
-  if (user?.role === "ADMIN") {
-    return <Navigate to="/admin" replace />;
-  }
-
-  if (user?.role === "USER") {
-    return <Navigate to="/" replace />;
-  }
-
-  // fallback: nếu có role lạ thì quay về home
+  // ✅ Nếu có user => điều hướng theo role
   if (user) {
+    if (user.role === "ADMIN") {
+      return <Navigate to="/admin" replace />;
+    }
+    if (user.role === "USER") {
+      return <Navigate to="/" replace />;
+    }
+    // fallback role lạ → về trang chủ
     return <Navigate to="/" replace />;
   }
 
@@ -64,15 +62,16 @@ const AuthLayout: React.FC = () => {
       new THREE.BufferAttribute(posArray, 3)
     );
 
+    // Tạo texture gradient
     const canvas = document.createElement("canvas");
     canvas.width = 32;
     canvas.height = 32;
     const ctx = canvas.getContext("2d");
     if (ctx) {
       const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-      gradient.addColorStop(0, "rgba(99, 102, 241, 1)");
-      gradient.addColorStop(0.5, "rgba(168, 85, 247, 0.5)");
-      gradient.addColorStop(1, "rgba(236, 72, 153, 0)");
+      gradient.addColorStop(0, "rgba(99,102,241,1)");
+      gradient.addColorStop(0.5, "rgba(168,85,247,0.5)");
+      gradient.addColorStop(1, "rgba(236,72,153,0)");
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 32, 32);
     }
@@ -147,7 +146,8 @@ const AuthLayout: React.FC = () => {
         ref={canvasRef}
         className="fixed top-0 left-0 w-full h-full -z-10"
         style={{
-          background: "linear-gradient(135deg, #000000 0%, #111827 50%, #1f2937 100%)",
+          background:
+            "linear-gradient(135deg, #000000 0%, #111827 50%, #1f2937 100%)",
         }}
       />
 
@@ -156,18 +156,18 @@ const AuthLayout: React.FC = () => {
         className="fixed top-0 left-0 w-full h-full -z-5 pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%)",
+            "radial-gradient(circle at 50% 50%, rgba(99,102,241,0.1) 0%, transparent 50%)",
         }}
       />
 
-      {/* Content Container */}
+      {/* Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div
             className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-8 border border-white/20"
             style={{
               boxShadow:
-                "0 8px 32px 0 rgba(31, 38, 135, 0.37), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1)",
+                "0 8px 32px 0 rgba(31,38,135,0.37), inset 0 1px 1px 0 rgba(255,255,255,0.1)",
             }}
           >
             <Outlet />
@@ -175,7 +175,7 @@ const AuthLayout: React.FC = () => {
         </div>
       </div>
 
-      {/* Decorative Elements */}
+      {/* Decorative Glows */}
       <div className="fixed top-10 left-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl -z-5" />
       <div className="fixed bottom-10 right-10 w-40 h-40 bg-pink-500/20 rounded-full blur-3xl -z-5" />
       <div className="fixed top-1/2 right-20 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl -z-5" />
