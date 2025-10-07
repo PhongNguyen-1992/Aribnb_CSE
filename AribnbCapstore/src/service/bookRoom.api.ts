@@ -31,11 +31,9 @@ export const bookingApi = {
    * }
    */
   createBooking: async (data: any) => {
-    try {
-      console.log("📤 Gửi API đặt phòng:", data);
+    try {   
       const res = await api.post(BASE_URL, data);
-      console.log("✅ Phản hồi API:", res.data);
-      return res.data.content;
+         return res.data.content;
     } catch (err: any) {
       console.error("❌ Lỗi khi đặt phòng:", err.response?.data || err);
       throw err;

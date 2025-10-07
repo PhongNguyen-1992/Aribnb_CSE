@@ -8,8 +8,7 @@ export const commentApi = {
     try {
       const res = await api.get("/binh-luan");
       return res.data.content || [];
-    } catch (error) {
-      console.error("❌ Lỗi khi lấy danh sách bình luận:", error);
+    } catch (error) { 
       throw error;
     }
   },
@@ -19,8 +18,7 @@ export const commentApi = {
     try {
       const res = await api.get(`/binh-luan/lay-binh-luan-theo-phong/${roomId}`);
       return res.data.content || [];
-    } catch (error) {
-      console.error("❌ Lỗi khi lấy bình luận theo phòng:", error);
+    } catch (error) {  
       throw error;
     }
   },
@@ -31,7 +29,6 @@ export const commentApi = {
       const res = await api.put(`/binh-luan/${id}`, data);
       return res.data;
     } catch (error) {
-      console.error("❌ Lỗi khi cập nhật bình luận:", error);
       throw error;
     }
   },
@@ -42,7 +39,6 @@ export const commentApi = {
       const res = await api.delete(`/binh-luan/${id}`);
       return res.data;
     } catch (error) {
-      console.error("❌ Lỗi khi xóa bình luận:", error);
       throw error;
     }
   },

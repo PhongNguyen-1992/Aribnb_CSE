@@ -29,8 +29,7 @@ export const loginAPI = async (credentials: {
   email: string;
   password: string;
 }): Promise<Users & { accessToken?: string }> => {
-  try {
-    console.log("🚀 Logging in with:", credentials);
+  try {  
 
     const loginData = {
       email: credentials.email,
@@ -40,9 +39,7 @@ export const loginAPI = async (credentials: {
     const response = await api.post<BaseAPIResponse<any>>(
       "/auth/signin",
       loginData
-    );
-
-    console.log("📥 Raw API Response:", response.data);
+    );   
 
     const user = response.data.content.user;
     const token = response.data.content.token;
@@ -53,11 +50,8 @@ export const loginAPI = async (credentials: {
     };
 
     localStorage.setItem("user", JSON.stringify(userWithToken));
-
-    console.log("✅ Login success, saved user:", userWithToken);
     return userWithToken;
-  } catch (error: any) {
-    console.error("❌ Login failed:", error?.response || error);
+  } catch (error: any) { 
     throw new Error(
       error.response?.data?.message || "Đăng nhập thất bại, vui lòng thử lại"
     );
@@ -75,18 +69,13 @@ export const registerAPI = async (registerData: {
   birthday: string;
   gender: boolean;
 }): Promise<Register> => {
-  try {
-    console.log("🚀 Registering with:", registerData);
-
+  try { 
     const response = await api.post<BaseAPIResponse<Register>>(
       "/auth/signup",
       registerData
     );
-
-    console.log("✅ Register success:", response.data);
     return response.data.content;
-  } catch (error: any) {
-    console.error("❌ Register failed:", error?.response || error);
+  } catch (error: any) {  
     
     if (error.response?.status === 400) {
       const errorMsg = error.response?.data?.content || "Dữ liệu không hợp lệ";
@@ -120,11 +109,9 @@ export const addUserAPI = async (data: Users): Promise<Register> => {
       "/users",
       data
     );
-
-    console.log("✅ User added successfully:", response.data);
+   
     return response.data.content;
   } catch (error: any) {
-    console.error("❌ Add user failed:", error?.response || error);
 
     if (error.response?.status === 401) {
       localStorage.removeItem("user");
@@ -142,11 +129,9 @@ export const addUserAPI = async (data: Users): Promise<Register> => {
     if (error.response?.status === 409) {
       throw new Error("Tài khoản hoặc email đã tồn tại trong hệ thống");
     }
-
     if (error.response?.status === 403) {
       throw new Error("Bạn không có quyền thực hiện chức năng này");
     }
-
     throw new Error("Có lỗi xảy ra khi thêm người dùng. Vui lòng thử lại");
   }
 };
@@ -158,7 +143,6 @@ export const isLoggedIn = (): boolean => {
   try {
     const userStr = localStorage.getItem("user");
     if (!userStr) return false;
-
     const user = JSON.parse(userStr);
     return !!(user && user.accessToken);
   } catch {
@@ -174,7 +158,6 @@ export const getCurrentUser = (): (Users & { accessToken?: string }) | null => {
   try {
     const userStr = localStorage.getItem("user");
     if (!userStr) return null;
-
     const user = JSON.parse(userStr);
     return user && user.accessToken ? user : null;
   } catch {

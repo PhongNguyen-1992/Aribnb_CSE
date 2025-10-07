@@ -24,12 +24,9 @@ api.interceptors.request.use(
         token: token || "", // token người dùng đang đăng nhập
         tokenCybersoft:
           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5Mb3AiOiJCb290Y2FtcCA4MyIsIkhldEhhblN0cmluZyI6IjE4LzAxLzIwMjYiLCJIZXRIYW5UaW1lIjoiMTc2ODY5NDQwMDAwMCIsIm5iZiI6MTc0MTg4ODgwMCwiZXhwIjoxNzY4ODQ1NjAwfQ.rosAjjMuXSBmnsEQ7BQi1qmo6eVOf1g8zhTZZg6WSx4",
-      };
-
-      console.log("✅ Gắn token:", token ? "Có token user" : "Không có token user");
+      };   
       return config;
     } catch (error) {
-      console.error("❌ Lỗi interceptor request:", error);
       localStorage.removeItem("user");
       return config;
     }
@@ -44,28 +41,19 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    console.error("❌ API Error:", {
-      url: error.config?.url,
-      status: error.response?.status,
-      message: error.message,
-      data: error.response?.data,
-    });
 
     // Token hết hạn hoặc sai
     if (error.response?.status === 401) {
-      console.warn("🚨 Token hết hạn hoặc không hợp lệ");
       localStorage.removeItem("user");
       // window.location.href = "/login";
     }
 
     // Không đủ quyền (403)
     if (error.response?.status === 403) {
-      console.warn("🚫 Không có quyền admin hoặc token sai");
     }
 
     // Lỗi kết nối mạng
-    if (error.code === "NETWORK_ERROR" || !error.response) {
-      console.error("🌐 Lỗi mạng hoặc server không phản hồi");
+    if (error.code === "NETWORK_ERROR" || !error.response) {   
     }
 
     return Promise.reject(error);

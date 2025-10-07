@@ -130,14 +130,13 @@ const AppHeader: React.FC = () => {
     }
   }, []);
 
-  // ✅ chỉ sửa thêm navigate('/') sau khi logout
   const handleLogout = (): void => {
     clearUser();
     localStorage.removeItem("user");
     setUser(null);
     message.success("Đăng xuất thành công!");
     setDrawerVisible(false);
-    navigate("/"); // ✅ chuyển về trang chủ
+    navigate("/"); 
   };
 
 
