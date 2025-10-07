@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Table,
   Tag,
@@ -13,10 +13,17 @@ import {
   DatePicker,
   Select,
 } from "antd";
-import { Eye, Trash2, RefreshCcw, Search, Calendar } from "lucide-react";
+import {
+  Eye,
+  Trash2,
+  RefreshCcw,
+  Search,
+  Calendar,
+} from "lucide-react";
 import { bookingApi } from "../../service/bookRoom.api";
-import dayjs, { Dayjs } from "dayjs";
 import { roomApi } from "../../service/AdminPageAPI/room.api";
+import dayjs, { Dayjs } from "dayjs";
+import debounce from "lodash.debounce";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -28,7 +35,7 @@ interface Booking {
   ngayDi: string;
   soLuongKhach: number;
   maNguoiDung: number;
-  tenPhong?: string; // ✅ Thêm tên phòng
+  tenPhong?: string;
 }
 
 const BookingManagement: React.FC = () => {
@@ -44,7 +51,6 @@ const BookingManagement: React.FC = () => {
     null,
     null,
   ]);
-
   const [roomCache, setRoomCache] = useState<Record<number, string>>({});
 
   // 🧭 Lấy danh sách đặt phòng + tên phòng
@@ -53,12 +59,10 @@ const BookingManagement: React.FC = () => {
       setLoading(true);
       const data = await bookingApi.getAll();
 
-      // 🔁 Lấy danh sách phòng (cache)
       const updated = await Promise.all(
         data.map(async (b: Booking) => {
-          if (roomCache[b.maPhong]) {
-            return { ...b, tenPhong: roomCache[b.maPhong] };
-          }
+          const cachedName = roomCache[b.maPhong];
+          if (cachedName) return { ...b, tenPhong: cachedName };
           try {
             const room = await roomApi.getById(b.maPhong);
             const name = room?.tenPhong || `Phòng #${b.maPhong}`;
@@ -73,8 +77,8 @@ const BookingManagement: React.FC = () => {
       setBookings(updated);
       setFilteredBookings(updated);
     } catch (err) {
-      message.error("Không thể tải danh sách đặt phòng!");
       console.error(err);
+      message.error("Không thể tải danh sách đặt phòng!");
     } finally {
       setLoading(false);
     }
@@ -89,35 +93,46 @@ const BookingManagement: React.FC = () => {
     const start = dayjs(checkIn);
     const end = dayjs(checkOut);
     const days = end.diff(start, "day");
-    return days > 0 ? days : 0;
+    return Math.max(days, 0);
   };
 
-  // 🔍 Bộ lọc dữ liệu
+  // 🔍 Bộ lọc dữ liệu có debounce để mượt hơn
+  const handleFilter = useMemo(
+    () =>
+      debounce(() => {
+        let filtered = [...bookings];
+        if (searchUser.trim()) {
+          filtered = filtered.filter((b) =>
+            b.maNguoiDung.toString().includes(searchUser.trim())
+          );
+        }
+        if (selectedMonth) {
+          filtered = filtered.filter(
+            (b) => dayjs(b.ngayDen).month() + 1 === selectedMonth
+          );
+        }
+        if (selectedYear) {
+          filtered = filtered.filter(
+            (b) => dayjs(b.ngayDen).year() === selectedYear
+          );
+        }
+        if (dateRange[0] && dateRange[1]) {
+          filtered = filtered.filter((b) => {
+            const ngayDen = dayjs(b.ngayDen);
+            return (
+              ngayDen.isAfter(dateRange[0]) && ngayDen.isBefore(dateRange[1])
+            );
+          });
+        }
+        setFilteredBookings(filtered);
+      }, 300),
+    [searchUser, selectedMonth, selectedYear, dateRange, bookings]
+  );
+
   useEffect(() => {
-    let filtered = [...bookings];
-    if (searchUser.trim()) {
-      filtered = filtered.filter((b) =>
-        b.maNguoiDung.toString().includes(searchUser.trim())
-      );
-    }
-    if (selectedMonth) {
-      filtered = filtered.filter(
-        (b) => dayjs(b.ngayDen).month() + 1 === selectedMonth
-      );
-    }
-    if (selectedYear) {
-      filtered = filtered.filter(
-        (b) => dayjs(b.ngayDen).year() === selectedYear
-      );
-    }
-    if (dateRange[0] && dateRange[1]) {
-      filtered = filtered.filter((b) => {
-        const ngayDen = dayjs(b.ngayDen);
-        return ngayDen.isAfter(dateRange[0]) && ngayDen.isBefore(dateRange[1]);
-      });
-    }
-    setFilteredBookings(filtered);
-  }, [searchUser, selectedMonth, selectedYear, dateRange, bookings]);
+    handleFilter();
+    return () => handleFilter.cancel();
+  }, [handleFilter]);
 
   // 🗑️ Xóa đặt phòng
   const handleDelete = async (id: number) => {
@@ -125,7 +140,7 @@ const BookingManagement: React.FC = () => {
       await bookingApi.delete(id);
       message.success("Đã xóa đơn đặt phòng!");
       setBookings((prev) => prev.filter((b) => b.id !== id));
-    } catch (err) {
+    } catch {
       message.error("Lỗi khi xóa đặt phòng!");
     }
   };
@@ -139,13 +154,7 @@ const BookingManagement: React.FC = () => {
       sorter: (a: Booking, b: Booking) => a.id - b.id,
     },
     {
-      title: "Mã phòng",
-      dataIndex: "maPhong",
-      key: "maPhong",
-      width: 90,
-    },
-    {
-      title: "Tên phòng",
+      title: "Phòng",
       dataIndex: "tenPhong",
       key: "tenPhong",
       render: (value: string) => (
@@ -171,19 +180,17 @@ const BookingManagement: React.FC = () => {
       render: (date: string) => dayjs(date).format("DD/MM/YYYY"),
     },
     {
-      title: "Số ngày lưu trú",
+      title: "Lưu trú",
       key: "stayDays",
       render: (_: any, record: Booking) => {
         const days = calcStayDays(record.ngayDen, record.ngayDi);
         return (
-          <Tag color={days >= 5 ? "purple" : "green"}>
-            {days} ngày
-          </Tag>
+          <Tag color={days >= 5 ? "purple" : "green"}>{days} ngày</Tag>
         );
       },
     },
     {
-      title: "Số khách",
+      title: "Khách",
       dataIndex: "soLuongKhach",
       key: "soLuongKhach",
       render: (value: number) => (
@@ -219,27 +226,27 @@ const BookingManagement: React.FC = () => {
   const years = Array.from({ length: 7 }, (_, i) => 2020 + i);
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
-          <h2 className="text-2xl font-semibold text-gray-800">
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
             🗓️ Quản lý đặt phòng
           </h2>
-          <div className="flex flex-wrap gap-3 items-center">
+          <div className="flex flex-wrap justify-center sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto">
             <Input
               prefix={<Search size={16} />}
               placeholder="Tìm mã người dùng..."
               value={searchUser}
               onChange={(e) => setSearchUser(e.target.value)}
-              className="w-48"
+              className="w-full sm:w-48"
             />
             <Select
               placeholder="Tháng"
               value={selectedMonth}
               onChange={(v) => setSelectedMonth(v)}
               allowClear
-              className="w-24"
+              className="w-full sm:w-24"
             >
               {Array.from({ length: 12 }, (_, i) => (
                 <Option key={i + 1} value={i + 1}>
@@ -252,7 +259,7 @@ const BookingManagement: React.FC = () => {
               value={selectedYear}
               onChange={(v) => setSelectedYear(v)}
               allowClear
-              className="w-24"
+              className="w-full sm:w-24"
             >
               {years.map((y) => (
                 <Option key={y} value={y}>
@@ -267,12 +274,13 @@ const BookingManagement: React.FC = () => {
               }
               placeholder={["Từ ngày", "Đến ngày"]}
               suffixIcon={<Calendar size={16} />}
-              className="w-64"
+              className="w-full sm:w-64"
             />
             <Button
               icon={<RefreshCcw size={16} />}
               onClick={fetchBookings}
               loading={loading}
+              className="w-full sm:w-auto"
             >
               Làm mới
             </Button>
@@ -324,8 +332,12 @@ const BookingManagement: React.FC = () => {
             <Descriptions.Item label="Ngày đi">
               {dayjs(selectedBooking.ngayDi).format("DD/MM/YYYY")}
             </Descriptions.Item>
-            <Descriptions.Item label="Số ngày lưu trú">
-              {calcStayDays(selectedBooking.ngayDen, selectedBooking.ngayDi)} ngày
+            <Descriptions.Item label="Lưu trú">
+              {calcStayDays(
+                selectedBooking.ngayDen,
+                selectedBooking.ngayDi
+              )}{" "}
+              ngày
             </Descriptions.Item>
             <Descriptions.Item label="Số lượng khách">
               {selectedBooking.soLuongKhach}

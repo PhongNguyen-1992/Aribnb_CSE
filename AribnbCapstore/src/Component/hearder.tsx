@@ -168,7 +168,7 @@ const AppHeader: React.FC = () => {
       key: "profile",
       label: "Thông tin cá nhân",
       icon: <UserCircle className="h-4 w-4 text-blue-500" />,
-      to: "/profile"
+      to: "/UserProfile"
     },
     ...(user?.role === "ADMIN" ? [{
       key: "admin",

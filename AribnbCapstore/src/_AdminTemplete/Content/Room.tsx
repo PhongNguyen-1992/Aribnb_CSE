@@ -10,12 +10,12 @@ import {
   message,
   Popconfirm,
   Spin,
+  Tooltip,
 } from "antd";
 import { Edit2, Trash2, Check, X, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { roomApi } from "../../service/AdminPageAPI/room.api";
 import type { Room } from "../../interfaces/room.interface";
-
 
 export default function RoomManager() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -96,9 +96,21 @@ export default function RoomManager() {
   const renderBool = (val: boolean) =>
     val ? <Check className="text-green-500" size={18} /> : <X className="text-red-500" size={18} />;
 
+  // 🔹 Cột hiển thị mô tả rút gọn + hover tooltip
+  const renderDescription = (text: string) => {
+    const short = text?.length > 50 ? text.slice(0, 50) + "..." : text;
+    return (
+      <Tooltip title={text} placement="topLeft">
+        <div className="max-w-[200px] truncate cursor-pointer text-gray-700 hover:text-blue-600 transition">
+          {short || "—"}
+        </div>
+      </Tooltip>
+    );
+  };
+
   const columns = [
     { title: "ID", dataIndex: "id", width: 60 },
-    { title: "Tên phòng", dataIndex: "tenPhong" },
+    { title: "Tên phòng", dataIndex: "tenPhong", className: "font-medium text-gray-800" },
     { title: "Khách", dataIndex: "khach", width: 80 },
     { title: "Phòng ngủ", dataIndex: "phongNgu", width: 100 },
     { title: "Giường", dataIndex: "giuong", width: 80 },
@@ -106,11 +118,14 @@ export default function RoomManager() {
     {
       title: "Giá tiền",
       dataIndex: "giaTien",
-      render: (v: number) => v.toLocaleString("vi-VN") + "₫",
+      render: (v: number) => v.toLocaleString("vi-VN") + " $",
+      width: 120,
     },
     {
       title: "Mô tả",
       dataIndex: "moTa",
+      render: renderDescription,
+      width: 250,
     },
     {
       title: "Ảnh",
@@ -119,9 +134,10 @@ export default function RoomManager() {
         <img
           src={url}
           alt="room"
-          className="w-16 h-16 object-cover rounded-md border"
+          className="w-16 h-16 object-cover rounded-md border shadow-sm"
         />
       ),
+      width: 90,
     },
     {
       title: "Tiện ích",
@@ -143,11 +159,11 @@ export default function RoomManager() {
       fixed: "right" as const,
       width: 120,
       render: (_: any, record: Room) => (
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-center">
           <Button
             icon={<Edit2 size={16} />}
             onClick={() => handleEdit(record)}
-            className="border-blue-500 text-blue-500 hover:bg-blue-50"
+            className="border-blue-500 text-blue-500 hover:bg-blue-50 rounded-md"
           />
           <Popconfirm
             title="Xóa phòng này?"
@@ -155,7 +171,7 @@ export default function RoomManager() {
             okText="Xóa"
             cancelText="Hủy"
           >
-            <Button danger icon={<Trash2 size={16} />} className="hover:bg-red-50" />
+            <Button danger icon={<Trash2 size={16} />} className="hover:bg-red-50 rounded-md" />
           </Popconfirm>
         </div>
       ),
@@ -190,7 +206,7 @@ export default function RoomManager() {
 
   // 🔹 Form số lượng khách, phòng, giường, tắm
   const renderRoomNumbers = (_: any) => (
-    <>
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       <Form.Item name="khach" label="Khách" rules={[{ required: true }]}>
         <InputNumber min={1} style={{ width: "100%" }} />
       </Form.Item>
@@ -203,16 +219,17 @@ export default function RoomManager() {
       <Form.Item name="phongTam" label="Phòng tắm" rules={[{ required: true }]}>
         <InputNumber min={1} style={{ width: "100%" }} />
       </Form.Item>
-    </>
+    </div>
   );
 
   return (
-    <div className="p-4 bg-white rounded-2xl shadow-sm">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Quản lý phòng</h2>
+    <div className="p-3 sm:p-5 bg-white rounded-2xl shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-800">🏠 Quản lý phòng</h2>
         <Button
           type="primary"
           icon={<Plus size={16} />}
+          className="rounded-lg shadow-sm hover:shadow-md transition"
           onClick={() => setIsAddModalOpen(true)}
         >
           Thêm phòng
@@ -220,13 +237,17 @@ export default function RoomManager() {
       </div>
 
       <Spin spinning={loading}>
-        <Table
-          rowKey="id"
-          columns={columns}
-          dataSource={rooms}
-          bordered
-          scroll={{ x: 1600 }}
-        />
+        <div className="overflow-x-auto rounded-xl border border-gray-100">
+          <Table
+            rowKey="id"
+            columns={columns}
+            dataSource={rooms}
+            bordered
+            pagination={{ pageSize: 5 }}
+            scroll={{ x: "max-content" }}
+            className="min-w-[900px] sm:min-w-full"
+          />
+        </div>
       </Spin>
 
       {/* 🔹 Modal chỉnh sửa */}
@@ -238,6 +259,7 @@ export default function RoomManager() {
         okText="Lưu"
         cancelText="Hủy"
         width={700}
+        className="rounded-xl"
       >
         <Form form={form} layout="vertical">
           <Form.Item name="tenPhong" label="Tên phòng" rules={[{ required: true }]}>
@@ -270,6 +292,7 @@ export default function RoomManager() {
         okText="Thêm"
         cancelText="Hủy"
         width={700}
+        className="rounded-xl"
       >
         <Form form={addForm} layout="vertical">
           <Form.Item name="tenPhong" label="Tên phòng" rules={[{ required: true }]}>
