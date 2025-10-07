@@ -33,7 +33,7 @@ const App: React.FC = () => {
   };
 
   const handleGoHome = () => {
-    navigate("/");
+    navigate("/Home");
   };
 
   const menuItems = [
