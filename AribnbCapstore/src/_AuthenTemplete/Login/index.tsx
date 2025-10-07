@@ -16,7 +16,7 @@ const Login: React.FC = () => {
       const user = await loginAPI(values);
 
       message.success(`Xin chào ${user.name || user.email}!`);
-      navigate("/");
+      navigate("/Home");
     } catch (error: any) {    
       message.error(error.message || "Đăng nhập thất bại!");
     }

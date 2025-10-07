@@ -63,14 +63,10 @@ export default function HomePage() {
       />
 
       {/* Header */}
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10"
-      >
-        <AppHeader />
-      </motion.div>
+    
+        <div className="!sticky !top-0 !z-50">
+        <AppHeader /></div>
+    
 
       {/* Main */}
       <main className="relative z-10 py-20 text-center">

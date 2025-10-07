@@ -136,7 +136,7 @@ const AppHeader: React.FC = () => {
     setUser(null);
     message.success("Đăng xuất thành công!");
     setDrawerVisible(false);
-    navigate("/"); 
+    navigate("/Home"); 
   };
 
 
@@ -186,21 +186,21 @@ const AppHeader: React.FC = () => {
       icon: <Home size={20} />,
       label: "Nơi Lưu Trú",
       displayIcon: <Home className="w-5 h-5" />,
-      to: "/NoiLuuTru"
+      to: "/Home"
     },
     {
       key: "TraiNghiem",
       icon: <Compass size={20} />,
       label: "Trải Nghiệm",
       displayIcon: <Compass className="w-5 h-5" />,
-      to: "/TraiNghiem"
+      to: "/Home"
     },
     {
       key: "DichVu",
       icon: <Wrench size={20} />,
       label: "Dịch Vụ",
       displayIcon: <Wrench className="w-5 h-5" />,
-      to: "/DichVu"
+      to: "/Home"
     },
   ];
 
@@ -224,7 +224,9 @@ const AppHeader: React.FC = () => {
           {!isMobile && (
             <>
               <div className="flex items-center justify-between px-4 py-3 container mx-auto">
-                <Logo/>
+                <NavLink to="/Home" className="flex items-center">
+                <Logo/></NavLink>
+                
 
                 {/* Animated Navigation */}
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full p-2 border border-white/20">

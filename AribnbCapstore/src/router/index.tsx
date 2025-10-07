@@ -2,7 +2,8 @@ import { Alert, Flex, Spin } from "antd";
 import { lazy, Suspense, type FC, type LazyExoticComponent } from "react";
 import { type RouteObject, Navigate } from "react-router-dom";
 
-// Lazy load pages
+// ✅ Lazy load các page
+const WelcomePage = lazy(() => import("../_HomeTemplete/StayInfoPage/Welcome"));
 const HomePage = lazy(() => import("../_HomeTemplete/_index"));
 const DichVu = lazy(() => import("../_HomeTemplete/ServicePage"));
 const TraiNghiem = lazy(() => import("../_HomeTemplete/ExperiencesPage"));
@@ -14,7 +15,7 @@ const Register = lazy(() => import("../_AuthenTemplete/Register/index"));
 const RoomDetail = lazy(() => import("../_HomeTemplete/StayInfoPage/detailRoom"));
 const UserProfile = lazy(() => import("../_HomeTemplete/ProfileUser/index"));
 
-
+// ✅ Suspense wrapper
 const withSuspense = (Component: LazyExoticComponent<FC>) => (
   <Suspense
     fallback={
@@ -32,8 +33,8 @@ const withSuspense = (Component: LazyExoticComponent<FC>) => (
         <Flex vertical align="center" justify="center" gap="large">
           <Spin tip="Loading..." size="large" />
           <Alert
-            message="Chào mừng bạn đến với Airbnb"
-            description="Chúng tôi đang tải dữ liệu, vui lòng chờ một chút..."
+            message="Chào mừng bạn đến với Lucie Travel"
+            description="Đang tải dữ liệu, vui lòng chờ một chút..."
             type="info"
             showIcon
           />
@@ -46,23 +47,37 @@ const withSuspense = (Component: LazyExoticComponent<FC>) => (
 );
 
 export const router: RouteObject[] = [
+  // ✅ Trang chào mừng
   {
     path: "/",
+    element: withSuspense(WelcomePage),
+  },
+
+  // ✅ Trang chính (home)
+  {
+    path: "/Home",
     element: withSuspense(HomePage),
     children: [
-      { index: true, element: <Navigate to="/NoiLuuTru" replace /> },
+      { index: true, element: withSuspense(NoiLuuTru) },
       { path: "NoiLuuTru", element: withSuspense(NoiLuuTru) },
       { path: "TraiNghiem", element: withSuspense(TraiNghiem) },
       { path: "DichVu", element: withSuspense(DichVu) },
     ],
-  },{
+  },
+
+  // ✅ Hồ sơ người dùng
+  {
     path: "/UserProfile",
     element: withSuspense(UserProfile),
   },
+
+  // ✅ Chi tiết phòng
   {
-    path: "/room-detail/:id/:tenViTri", 
+    path: "/room-detail/:id/:tenViTri",
     element: withSuspense(RoomDetail),
   },
+
+  // ✅ Auth
   {
     path: "/auth",
     element: withSuspense(AuthLayout),
@@ -71,8 +86,16 @@ export const router: RouteObject[] = [
       { path: "register", element: withSuspense(Register) },
     ],
   },
+
+  // ✅ Admin
   {
     path: "/admin",
     element: withSuspense(AdminPage),
+  },
+
+  // ✅ Nếu nhập sai URL → về trang Welcome
+  {
+    path: "*",
+    element: <Navigate to="/" replace />,
   },
 ];
