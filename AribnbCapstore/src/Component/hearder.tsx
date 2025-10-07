@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Layout, Button, Dropdown, Avatar, message, Drawer } from "antd";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom"; // ✅ thêm useNavigate
 import {
   Home,
   Compass,
@@ -28,23 +28,18 @@ interface MenuItem {
   icon?: React.ReactNode;
   label: React.ReactNode;
   displayIcon?: React.ReactNode;
-  to: string; // Add the 'to' property directly to MenuItem
+  to: string;
 }
-
 
 interface AnimatedSearchBarProps {
   isMobile: boolean;
   onSearch: () => void;
 }
 
-
 // Animated Background Component
 const AnimatedBackground: React.FC = () => (
   <div className="absolute inset-0 overflow-hidden">
-    {/* Main gradient */}
     <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-500 via-orange-400 to-yellow-400 animate-gradient-shift" />
-    
-    {/* Animated mesh gradient */}
     <div 
       className="absolute inset-0 opacity-60"
       style={{
@@ -56,8 +51,6 @@ const AnimatedBackground: React.FC = () => (
         animation: 'meshMove 8s ease-in-out infinite alternate'
       }}
     />
-    
-    {/* Floating orbs */}
     <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-float" />
     <div className="absolute top-10 right-32 w-20 h-20 bg-yellow-300/20 rounded-full blur-xl animate-float-delay-1" />
     <div className="absolute bottom-20 left-1/3 w-24 h-24 bg-pink-300/20 rounded-full blur-xl animate-float-delay-2" />
@@ -65,9 +58,8 @@ const AnimatedBackground: React.FC = () => (
   </div>
 );
 
-// Animated Search Bar inspired by React Bits
+// Animated Search Bar
 const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({ isMobile, onSearch }) => {
-  
   if (isMobile) {
     return (
       <div className="px-4 pb-6">
@@ -102,29 +94,24 @@ const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({ isMobile, onSearc
       </div>
     );
   }  
- 
 };
-
 
 const AppHeader: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate(); // ✅ thêm dòng này
   const { clearUser } = userAuthStore((state: any) => state);
   const [user, setUser] = useState<LoginApiResponse | null>(null);
   const [drawerVisible, setDrawerVisible] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [scrolled, setScrolled] = useState<boolean>(false);
 
-  // Check mobile and scroll
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     const handleScroll = () => setScrolled(window.scrollY > 50);
-    
     checkMobile();
     handleScroll();
-    
     window.addEventListener('resize', checkMobile);
     window.addEventListener('scroll', handleScroll);
-    
     return () => {
       window.removeEventListener('resize', checkMobile);
       window.removeEventListener('scroll', handleScroll);
@@ -143,13 +130,16 @@ const AppHeader: React.FC = () => {
     }
   }, []);
 
+  // ✅ chỉ sửa thêm navigate('/') sau khi logout
   const handleLogout = (): void => {
     clearUser();
     localStorage.removeItem("user");
     setUser(null);
     message.success("Đăng xuất thành công!");
     setDrawerVisible(false);
+    navigate("/"); // ✅ chuyển về trang chủ
   };
+
 
   const avatarMenu = {
     items: [
@@ -316,7 +306,7 @@ const AppHeader: React.FC = () => {
                   size="large"
                 />
               </div>
-              <AnimatedSearchBar isMobile={true} onSearch={handleSearch} />
+              {/* <AnimatedSearchBar isMobile={true} onSearch={handleSearch} /> */}
             </>
           )}
         </div>
