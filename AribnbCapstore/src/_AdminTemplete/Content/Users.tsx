@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Input, Pagination, Modal, message, Form, Select, Spin } from "antd";
+import {
+  Table,
+  Button,
+  Input,
+  Pagination,
+  Modal,
+  message,
+  Form,
+  Select,
+  Spin,
+} from "antd";
 import { Edit2, Trash2, Eye, EyeOff, Search, Plus } from "lucide-react";
 import type { UserFromServer } from "../../interfaces/admin.interface";
 import {
   addUserAPI,
   deleteUserAPI,
-  getUsersPaginatedSearchAPI,
-  searchUserByNameAPI,
+  getUsersPaginatedSearchAPI,  
   updateUserAPI,
   uploadAvatarAPI,
 } from "../../service/AdminPageAPI/user.api";
@@ -70,14 +79,21 @@ const UserManagement: React.FC = () => {
   }, [pageIndex, pageSize]);
 
   // 🔹 Search
+  // 🔹 Search
   const handleSearch = async () => {
-    const keyword = searchKeyword.trim();
-    if (!keyword) return message.warning("Vui lòng nhập tên để tìm kiếm!");
+    const keyword = searchKeyword.trim().toLowerCase();
+    if (!keyword) return message.warning("Vui lòng nhập từ khóa để tìm kiếm!");
     setSearching(true);
     try {
-      const res = await searchUserByNameAPI(keyword);
-      setUsers(res);
-      setTotalRow(res.length);
+      const res = await getUsersPaginatedSearchAPI(1, 9999); // Lấy nhiều dữ liệu hơn để lọc frontend
+      const filtered = res.data.filter(
+        (u: UserFromServer) =>
+          u.id.toString().includes(keyword) ||
+          u.name?.toLowerCase().includes(keyword) ||
+          u.email?.toLowerCase().includes(keyword)
+      );
+      setUsers(filtered);
+      setTotalRow(filtered.length);
     } catch (err) {
       message.error("Không thể tìm kiếm!");
     } finally {
@@ -87,6 +103,7 @@ const UserManagement: React.FC = () => {
 
   const handleResetSearch = () => {
     setSearchKeyword("");
+    setPageIndex(1);
     loadUsers();
   };
 
@@ -132,26 +149,47 @@ const UserManagement: React.FC = () => {
   };
 
   // 🔹 Xóa user - FIXED
-  const handleDeleteUser = (user: UserFromServer) => {
+  const handleDeleteUser = async (user: UserFromServer) => {
     Modal.confirm({
-      title: "Xác nhận xóa",
+      title: "🗑️ Xác nhận xóa người dùng",
+      centered: true,
+      width: 420,
       content: (
-        <div>
-          <p>Bạn có chắc muốn xóa người dùng này không?</p>
-          <p className="mt-1 font-semibold">{user.name}</p>
+        <div className="space-y-2">
+          <p>Bạn có chắc chắn muốn xóa người dùng này không?</p>
+          <p className="font-semibold text-red-600">{user.name}</p>
           <p className="text-sm text-gray-500">{user.email}</p>
         </div>
       ),
       okText: "Xóa",
-      okType: "danger",
       cancelText: "Hủy",
-      onOk: async () => {
+      okType: "danger",
+      okButtonProps: {
+        className:
+          "bg-red-500 hover:bg-red-600 text-white rounded-md transition-all duration-200",
+      },
+      cancelButtonProps: {
+        className:
+          "bg-gray-200 hover:bg-gray-300 rounded-md transition-all duration-200",
+      },
+
+      async onOk() {
         try {
+          console.log("🧩 Gửi request xóa:", `/users/${user.id}`);
+
+          // Gọi API xóa
           await deleteUserAPI(user.id);
-          message.success(`Đã xóa người dùng: ${user.name}`);
-          loadUsers(); // Refresh table after delete
+
+          // Hiển thị thông báo thành công
+          message.success(`✅ Đã xóa người dùng: ${user.name}`);
+
+          // Reload danh sách sau khi xóa
+          await loadUsers();
         } catch (err: any) {
-          message.error(err?.message || "Không thể xóa người dùng!");
+          console.error("❌ Lỗi xóa:", err);
+          message.error(
+            err?.response?.data?.message || "Không thể xóa người dùng!"
+          );
         }
       },
     });
@@ -166,7 +204,11 @@ const UserManagement: React.FC = () => {
       title: "Vai trò",
       dataIndex: "role",
       render: (role: string) => (
-        <span className={`px-2 py-1 rounded-full text-white ${role === "ADMIN" ? "bg-purple-600" : "bg-green-600"}`}>
+        <span
+          className={`px-2 py-1 rounded-full text-white ${
+            role === "ADMIN" ? "bg-purple-600" : "bg-green-600"
+          }`}
+        >
           {role}
         </span>
       ),
@@ -174,7 +216,9 @@ const UserManagement: React.FC = () => {
     {
       title: "Mật khẩu",
       dataIndex: "password",
-      render: (_: string, row: UserFromServer) => <PasswordCell password={row.password || ""} />,
+      render: (_: string, row: UserFromServer) => (
+        <PasswordCell password={row.password || ""} />
+      ),
     },
     {
       title: "Thao tác",
@@ -184,9 +228,9 @@ const UserManagement: React.FC = () => {
           <Button icon={<Edit2 />} onClick={() => handleOpenModal(row)}>
             Chỉnh sửa
           </Button>
-          <Button 
-            icon={<Trash2 />} 
-            danger 
+          <Button
+            icon={<Trash2 />}
+            danger
             onClick={() => handleDeleteUser(row)}
           >
             Xóa
@@ -200,7 +244,7 @@ const UserManagement: React.FC = () => {
     <div className="p-4">
       <div className="flex gap-2 mb-4">
         <Input
-          placeholder="Tìm kiếm..."
+          placeholder="Tìm kiếm theo ID, mail, tên..."
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
           onPressEnter={handleSearch}
@@ -215,7 +259,12 @@ const UserManagement: React.FC = () => {
       </div>
 
       <Spin spinning={loading}>
-        <Table dataSource={users} columns={columns} rowKey="id" pagination={false} />
+        <Table
+          dataSource={users}
+          columns={columns}
+          rowKey="id"
+          pagination={false}
+        />
       </Spin>
 
       <Pagination
@@ -241,7 +290,11 @@ const UserManagement: React.FC = () => {
           <Form.Item name="name" label="Tên" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="email" label="Email" rules={[{ required: true }, { type: "email" }]}>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[{ required: true }, { type: "email" }]}
+          >
             <Input />
           </Form.Item>
           <Form.Item name="phone" label="Phone" rules={[{ required: true }]}>
@@ -253,10 +306,15 @@ const UserManagement: React.FC = () => {
               <Option value="USER">USER</Option>
             </Select>
           </Form.Item>
-          <Form.Item name="password" label="Mật khẩu" rules={[{ required: !editingUser }]}>
-            <Input.Password placeholder={editingUser ? "Để trống nếu không đổi" : ""} />
+          <Form.Item
+            name="password"
+            label="Mật khẩu"
+            rules={[{ required: !editingUser }]}
+          >
+            <Input.Password
+              placeholder={editingUser ? "Để trống nếu không đổi" : ""}
+            />
           </Form.Item>
-        
         </Form>
       </Modal>
     </div>

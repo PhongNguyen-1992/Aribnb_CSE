@@ -39,7 +39,7 @@ interface AnimatedSearchBarProps {
 // Animated Background Component
 const AnimatedBackground: React.FC = () => (
   <div className="absolute inset-0 overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-500 via-orange-400 to-yellow-400 animate-gradient-shift" />
+    <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-yellow-400 animate-gradient-shift" />
     <div 
       className="absolute inset-0 opacity-60"
       style={{
@@ -402,7 +402,7 @@ const AppHeader: React.FC = () => {
                   </p>
                   <p className="text-xl font-bold m-0">{user.name || "User"}</p>
                   {user.role === "ADMIN" && (
-                    <span className="inline-block text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-yellow-900 px-3 py-1 rounded-full font-bold shadow-lg animate-bounce mt-2 flex items-center gap-1 w-fit">
+                    <span className=" text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-yellow-900 px-3 py-1 rounded-full font-bold shadow-lg animate-bounce mt-2 flex items-center gap-1 w-fit">
                       <Shield className="w-3 h-3" />
                       Quản trị viên
                     </span>
