@@ -5,6 +5,7 @@ import { bookingApi } from "../../service/bookRoom.api";
 import { motion } from "framer-motion";
 import { ArrowRight, LogIn, UserPlus, X } from "lucide-react";
 import Logo from "../../Component/logo";
+import { useNavigate } from "react-router";
 
 const { RangePicker } = DatePicker;
 
@@ -27,7 +28,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
   const [guestCount, setGuestCount] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
   const [loginPrompt, setLoginPrompt] = useState<boolean>(false);  
-
+  const navigate = useNavigate();
   const handleBooking = async () => {
     try {
       const userLocal = localStorage.getItem("user");
@@ -143,23 +144,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
                   </strong>
                 </div>
               </div>
-            )}
-
-            {/* <div className="flex justify-end gap-2 mt-4">
-              <button
-                className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 transition"
-                onClick={onClose}
-              >
-                Hủy
-              </button>
-              <button
-                className="px-4 py-2 rounded-md bg-pink-500 text-white hover:bg-pink-600 transition"
-                onClick={handleBooking}
-                disabled={loading}
-              >
-                {loading ? "Đang xử lý..." : "Thanh toán"}
-              </button>
-            </div> */}
+            )}         
             <div className="flex justify-end gap-3 mt-6">
               {/* Nút Hủy */}
               <button
@@ -264,7 +249,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
               onClick={() => {
                 setLoginPrompt(false);
                 onClose();
-                window.location.href = "/auth/register";
+                navigate("/auth/register");
               }}
               className="flex items-center justify-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md hover:shadow-lg transition-all"
             >
@@ -278,7 +263,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
               onClick={() => {
                 setLoginPrompt(false);
                 onClose();
-                window.location.href = "/auth/login";
+                navigate("/auth/login");
               }}
               className="flex items-center justify-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md hover:shadow-lg transition-all"
             >

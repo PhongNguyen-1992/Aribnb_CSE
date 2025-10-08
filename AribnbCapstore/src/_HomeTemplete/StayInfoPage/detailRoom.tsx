@@ -18,13 +18,15 @@ import {
   Check,
   Sparkles,
 } from "lucide-react";
-import { Card, Button, Tag, Divider, Spin, Alert } from "antd";
+import { Card, Button, Tag, Divider, Spin, Alert,Modal } from "antd";
 import { roomApi } from "../../service/AdminPageAPI/room.api";
 import type { Room } from "../../interfaces/room.interface";
 import Footer from "../../Component/footer";
 import BookingModal from "./ModalBooking";
 import CommentList from "./Reviewer/ListReview";
 import AppHeader from "../../Component/hearder";
+import Zoom from 'react-medium-image-zoom';
+import 'react-medium-image-zoom/dist/styles.css';
 
 const RoomDetail = () => {
   const { id, tenViTri } = useParams<{ id: string; tenViTri: string }>();
@@ -34,6 +36,8 @@ const RoomDetail = () => {
   const [openBooking, setOpenBooking] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showContent, setShowContent] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  
 
   useEffect(() => {
     const fetchRoomDetail = async () => {
@@ -129,30 +133,47 @@ const RoomDetail = () => {
         </div>
 
         {/* Image Gallery */}
-        {room.hinhAnh && (
-          <div className={`mb-8 rounded-2xl overflow-hidden shadow-xl transition-all duration-700 ${showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
-            <div className="relative group">
-              <img
-                src={room.hinhAnh}
-                alt={room.tenPhong}
-                className={`w-full h-[500px] object-cover group-hover:scale-110 transition-all duration-700 ${imageLoaded ? 'blur-0' : 'blur-sm'}`}
-                onLoad={() => setImageLoaded(true)}
-                onError={(e) => {
-                  e.currentTarget.src =
-                    "https://via.placeholder.com/1200x500?text=Room+Image";
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg transform translate-x-20 group-hover:translate-x-0 transition-transform duration-500">
-                <span className="font-semibold text-pink-600 flex items-center gap-2">
-                  <Sparkles size={18} className="animate-pulse" />
-                  Phòng cao cấp
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
+       {room.hinhAnh && (
+  <div className={`mb-8 rounded-2xl overflow-hidden shadow-xl transition-all duration-700 ${showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+    <div className="relative group">
+      <Zoom>
+        <img
+          src={room.hinhAnh}
+          alt={room.tenPhong}
+          className={`w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover group-hover:scale-110 transition-all duration-700 cursor-pointer ${imageLoaded ? 'blur-0' : 'blur-sm'}`}
+          onLoad={() => setImageLoaded(true)}
+          onError={(e) => {
+            e.currentTarget.src =
+              "https://via.placeholder.com/1200x500?text=Room+Image";
+          }}
+        />
+      </Zoom>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg transform translate-x-20 group-hover:translate-x-0 transition-transform duration-500">
+        <span className="font-semibold text-pink-600 flex items-center gap-2">
+          <Sparkles size={18} className="animate-pulse" />
+          Phòng cao cấp
+        </span>
+      </div>
+    </div>
+  </div>
+)}
 
+        {/* Modal ảnh lớn */}
+        <Modal
+          open={isImageModalOpen}
+          onCancel={() => setIsImageModalOpen(false)}
+          footer={null}
+          centered
+          bodyStyle={{ padding: 0, backgroundColor: "transparent" }}
+          width="90%"
+        >
+          <img
+            src={room.hinhAnh}
+            alt={room.tenPhong}
+            className="w-full h-auto object-contain rounded-2xl"
+          />
+        </Modal>
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
