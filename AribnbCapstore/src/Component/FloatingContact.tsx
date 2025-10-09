@@ -60,17 +60,17 @@ export default function FloatingContact() {
     const msg = message.toLowerCase();
 
     // Greetings
-    if (msg.match(/^(hi|hello|xin chào|chào|hey|Ben|Chào Ben|)/)) {
+    if (msg.match(/^(hi|hello|xin chào|chào|hey|Ben|Chào Ben)/)) {
       return "Xin chào! 👋 Tôi là Ben Ngố – trợ lý AI của bạn. Tôi có thể giúp gì cho bạn hôm nay?";
     }
 
     // Help/Service questions
-    if (msg.includes("giúp") || msg.includes("help") || msg.includes("hỗ trợ")) {
+    if (msg.includes("giúp") || msg.includes("help") || msg.includes("hỗ trợ")|| msg.includes("cần hỗ trợ")) {
       return "Tôi có thể hỗ trợ bạn về:\n• Thông tin sản phẩm/dịch vụ\n• Giá cả và khuyến mãi\n• Liên hệ tư vấn\n• Câu hỏi thường gặp\n\nBạn cần biết thêm điều gì? 😊";
     }
 
     // Product/Service
-    if (msg.includes("sản phẩm") || msg.includes("dịch vụ") || msg.includes("product")|| msg.includes("tour") || msg.includes("service")) {
+    if (msg.includes("sản phẩm") || msg.includes("dịch vụ") || msg.includes("product")|| msg.includes("tour") || msg.includes("service")|| msg.includes("đăt phòng")|| msg.includes("đăt tour")|| msg.includes("thuê phòng")) {
       return "Chúng tôi cung cấp nhiều sản phẩm/dịch vụ thuê phòng chất lượng cao. Để tôi kết nối bạn với chuyên viên tư vấn để được hỗ trợ tốt nhất nhé!\n📞 Hotline: 0339990014\n💬 Chat Zalo: zalo.me/339990014";
     }
 
