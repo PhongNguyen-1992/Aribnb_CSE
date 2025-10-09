@@ -38,6 +38,7 @@ import dayjs from "dayjs";
 import type { Users } from "../../interfaces/auth.interface";
 import { create } from "zustand";
 import AppHeader from "../../Component/hearder";
+import FloatingContact from "../../Component/FloatingContact";
 
 // ===== STORE =====
 const getUserFromStorage = (): Users | null => {
@@ -584,7 +585,7 @@ const UserProfile: React.FC = () => {
             )}
           </Spin>
         </Card>
-
+<FloatingContact/>
         <div className="mt-8">
           <Footer />
         </div>

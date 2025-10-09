@@ -27,6 +27,7 @@ import CommentList from "./Reviewer/ListReview";
 import AppHeader from "../../Component/hearder";
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
+import FloatingContact from "../../Component/FloatingContact";
 
 const RoomDetail = () => {
   const { id, tenViTri } = useParams<{ id: string; tenViTri: string }>();
@@ -339,7 +340,7 @@ const RoomDetail = () => {
           </div>
         </div>
       )}
-
+<FloatingContact/>
       {/* Footer */}
       <div style={{ marginTop: '24px' }}>
       <Footer /></div>

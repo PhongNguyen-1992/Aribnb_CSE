@@ -5,6 +5,7 @@ import { Sparkles, Star } from "lucide-react";
 import Footer from "../Component/footer";
 import ListVisit from "./StayInfoPage/listVist";
 import AppHeader from "../Component/hearder";
+import FloatingContact from "../Component/FloatingContact";
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
@@ -166,7 +167,7 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
+<FloatingContact/>
       {/* Footer */}
       <motion.footer
         initial={{ opacity: 0 }}
