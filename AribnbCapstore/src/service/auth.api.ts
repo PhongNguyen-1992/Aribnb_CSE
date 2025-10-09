@@ -53,10 +53,12 @@ export const loginAPI = async (credentials: {
     return userWithToken;
   } catch (error: any) { 
     throw new Error(
-      error.response?.data?.message || "Đăng nhập thất bại, vui lòng thử lại"
+      error.response?.data?.content || "Đăng nhập thất bại, vui lòng thử lại"
     );
   }
 };
+
+
 
 /**
  * API đăng ký
@@ -69,26 +71,25 @@ export const registerAPI = async (registerData: {
   birthday: string;
   gender: boolean;
 }): Promise<Register> => {
-  try { 
+  try {
     const response = await api.post<BaseAPIResponse<Register>>(
       "/auth/signup",
-      registerData
+      registerData,
+      { maxRedirects: 0 } // ✅ ngăn axios tự redirect nếu backend trả về Location
     );
     return response.data.content;
-  } catch (error: any) {  
-    
+  } catch (error: any) {
     if (error.response?.status === 400) {
       const errorMsg = error.response?.data?.content || "Dữ liệu không hợp lệ";
       throw new Error(errorMsg);
     }
-    
     if (error.response?.status === 409) {
       throw new Error("Email đã được sử dụng!");
     }
-    
     throw new Error("Đăng ký thất bại! Vui lòng thử lại.");
   }
 };
+
 
 /**
  * API thêm người dùng mới (Admin function)
